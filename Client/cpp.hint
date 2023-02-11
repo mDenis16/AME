@@ -1,0 +1,6 @@
+// Hint files help the Visual Studio IDE interpret Visual C++ identifiers
+// such as names of functions and macros.
+// For more information see https://go.microsoft.com/fwlink/?linkid=865984
+#define XBR_VIRTUAL_BASE_2802(Start)
+#define XBR_VIRTUAL_METHOD(Return, Name, Args) private: using XBRDispatch_##Name = Return (*) Args; public: template<typename... TArgs> inline Return Name(TArgs&&... args) { auto dispatch = (xbr::virt::PrependArgT<XBRDispatch_##Name>)GetDispatch<__COUNTER__>(this); return dispatch(this, std::forward<TArgs>(args)...); }
+#define XBR_VIRTUAL_METHOD(Return, Name, Args)

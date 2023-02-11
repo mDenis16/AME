@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{8a7be920-52b0-4ad7-95d9-44c7dfc3c30d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hooking">
+      <UniqueIdentifier>{fa5fe052-5d5a-4e20-9a37-62f43333eb0f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Factories">
+      <UniqueIdentifier>{04846987-2611-4395-bf05-8a5617dd46c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FactoryBase">
+      <UniqueIdentifier>{d01a79c9-6ce8-4237-a704-a5b263270354}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Factories\LevelLoader">
+      <UniqueIdentifier>{441c93ac-6ee4-43c1-a479-78d5a188ff6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Factories\GameSkeleton">
+      <UniqueIdentifier>{bf951544-82e3-49b7-b94a-e5cc7349a908}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Factories\GameFrame">
+      <UniqueIdentifier>{103a7f58-20fb-44cf-aa6f-216a36b60938}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render">
+      <UniqueIdentifier>{654484a3-bb8d-4f21-8a59-6262c425019d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Render\DirectX">
+      <UniqueIdentifier>{841103de-71b7-46fc-914a-1417029cc1bb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Factories\CRender">
+      <UniqueIdentifier>{cbbe9355-96f5-4d0d-96be-8c94f66e6a92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Factories\NativeInvoker">
+      <UniqueIdentifier>{15c289b7-35e6-42f6-a056-ee18bb39833f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RAGE">
+      <UniqueIdentifier>{4376db67-9eb8-48be-ad8d-0b9210bee47e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting">
+      <UniqueIdentifier>{b95d054c-d05a-4b92-9580-1ec63becb129}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting\CScriptFiber">
+      <UniqueIdentifier>{6da190ff-f948-42f4-b8a5-f0d71fdc6dfc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Factories\ScriptVM">
+      <UniqueIdentifier>{999f0bd4-01c1-4e82-8897-ee689eb46198}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Factories\GameEvents">
+      <UniqueIdentifier>{82504497-c14d-46a1-adc9-82c33a7540ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Factories\ScriptVM\Ptclaudelu">
+      <UniqueIdentifier>{8964f24c-c711-49c9-a192-6b3088e4929f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Factories\CleanWorld">
+      <UniqueIdentifier>{9c8dc8a3-d311-4550-8574-d6f68744d9e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Factories\NetworkForce">
+      <UniqueIdentifier>{6bcab976-8cff-4292-9691-f4811e00dbc6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Factories\NetGame">
+      <UniqueIdentifier>{a1faedc6-ab73-4d71-880c-8c25fa758ffc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CBootstrap.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="CVGame.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="IATHook.h">
+      <Filter>Hooking</Filter>
+    </ClInclude>
+    <ClInclude Include="Hooking.h">
+      <Filter>Hooking</Filter>
+    </ClInclude>
+    <ClInclude Include="Hooking.Invoke.h">
+      <Filter>Hooking</Filter>
+    </ClInclude>
+    <ClInclude Include="Hooking.Patterns.h">
+      <Filter>Hooking</Filter>
+    </ClInclude>
+    <ClInclude Include="CLevelLoader.h">
+      <Filter>Factories\LevelLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="CBaseFactory.h">
+      <Filter>FactoryBase</Filter>
+    </ClInclude>
+    <ClInclude Include="CGameSkeleton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CGameFrame.h">
+      <Filter>Factories\GameFrame</Filter>
+    </ClInclude>
+    <ClInclude Include="CRender.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="d3d11.h">
+      <Filter>Render</Filter>
+    </ClInclude>
+    <ClInclude Include="d3d11hook.h">
+      <Filter>Render\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="CRenderGame.h">
+      <Filter>Factories\CRender</Filter>
+    </ClInclude>
+    <ClInclude Include="HookFunction.h">
+      <Filter>Hooking</Filter>
+    </ClInclude>
+    <ClInclude Include="CNativeInvoker.h">
+      <Filter>Factories\NativeInvoker</Filter>
+    </ClInclude>
+    <ClInclude Include="CGtaThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CScriptHandlerMgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CScriptVM.h">
+      <Filter>Factories\ScriptVM</Filter>
+    </ClInclude>
+    <ClInclude Include="nativeList.h">
+      <Filter>Factories\NativeInvoker</Filter>
+    </ClInclude>
+    <ClInclude Include="CGameEvents.h">
+      <Filter>Factories\GameEvents</Filter>
+    </ClInclude>
+    <ClInclude Include="XBRVirtual.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CCrossmap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CCleanWorld.h">
+      <Filter>Factories\CleanWorld</Filter>
+    </ClInclude>
+    <ClInclude Include="CNetworkForce.h">
+      <Filter>Factories\NetworkForce</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CVGame.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="CBootstrap.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="IATHook.cpp">
+      <Filter>Hooking</Filter>
+    </ClCompile>
+    <ClCompile Include="Hooking.cpp">
+      <Filter>Hooking</Filter>
+    </ClCompile>
+    <ClCompile Include="Hooking.Patterns.cpp">
+      <Filter>Hooking</Filter>
+    </ClCompile>
+    <ClCompile Include="CBaseFactory.cpp">
+      <Filter>FactoryBase</Filter>
+    </ClCompile>
+    <ClCompile Include="CLevelLoader.cpp">
+      <Filter>Factories\LevelLoader</Filter>
+    </ClCompile>
+    <ClCompile Include="CGameSkeleton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CGameFrame.cpp">
+      <Filter>Factories\GameFrame</Filter>
+    </ClCompile>
+    <ClCompile Include="CRender.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="d3d11.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
+    <ClCompile Include="d3d11hook.cpp">
+      <Filter>Render\DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="CRenderGame.cpp">
+      <Filter>Factories\CRender</Filter>
+    </ClCompile>
+    <ClCompile Include="HookFunction.cpp">
+      <Filter>Hooking</Filter>
+    </ClCompile>
+    <ClCompile Include="CNativeInvoker.cpp">
+      <Filter>Factories\NativeInvoker</Filter>
+    </ClCompile>
+    <ClCompile Include="CGtaThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CScriptHandlerMgr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CScriptVM.cpp">
+      <Filter>Factories\ScriptVM</Filter>
+    </ClCompile>
+    <ClCompile Include="CGameEvents.cpp">
+      <Filter>Factories\GameEvents</Filter>
+    </ClCompile>
+    <ClCompile Include="CCrossmap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CCleanWorld.cpp">
+      <Filter>Factories\CleanWorld</Filter>
+    </ClCompile>
+    <ClCompile Include="CNetworkForce.cpp">
+      <Filter>Factories\NetworkForce</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
+  </ItemGroup>
+</Project>
