@@ -1,7 +1,7 @@
 #include "CGtaThread.h"
 #include "Hooking.h"
 #include <xlocbuf>
-#include <string>
+
 
 void CGtaThread::Hook()
 {

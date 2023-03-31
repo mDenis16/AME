@@ -11,7 +11,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
                        LPVOID lpReserved
                      )
 {
-   
+    
     CVGame::Bootstrap.Main(hModule, ul_reason_for_call, lpReserved);
     return TRUE;
 }

@@ -3,8 +3,27 @@
 #include <iostream>
 #include <unordered_map>
 #include <functional>
-namespace RAGE
-{
+
+	struct scrVector
+	{
+		alignas(8) float x;
+		alignas(8) float y;
+		alignas(8) float z;
+	};
+
+	struct alignas(16) scrVec3N
+	{
+		float x;
+		float y;
+		float z;
+	};
+
+	struct scrVectorSpace
+	{
+		scrVector* outVectors[4];
+		scrVec3N inVectors[4];
+	};
+
 	class ScrNativeCallContext
 	{
 	public:
@@ -46,12 +65,25 @@ namespace RAGE
 		{
 			*reinterpret_cast<std::remove_cv_t<std::remove_reference_t<T>>*>(ReturnVal) = std::forward<T>(value);
 		}
+		inline void SetVectorResults()
+		{
+			for (size_t i = 0; i < DataCount; i++)
+			{
+				auto outVector = m_vectorSpace.outVectors[i];
+				const auto& inVector = m_vectorSpace.inVectors[i];
+
+				outVector->x = inVector.x;
+				outVector->y = inVector.y;
+				outVector->z = inVector.z;
+			}
+		}
 	protected:
 		void* ReturnVal;
 		std::uint32_t ArgCount;
 		void* Args;
 		std::int32_t DataCount;
-		std::uint32_t Data[48];
+		scrVectorSpace m_vectorSpace;
+		uint8_t pad[96];
 	};
 
 	using ScrNativeHash = std::uint64_t;
@@ -70,7 +102,6 @@ namespace RAGE
 #pragma pack(pop)
 
 	//assert(sizeof(scrNativeCallContext) == 0xE0);
-}
 
 using NativeVoid = void;
 using NativeAny = std::uint32_t;
@@ -97,7 +128,7 @@ using NativeVector3 = glm::vec3;
 struct NativeRegistration {
 	uint64_t nextRegBase;
 	uint64_t nextRegKey;
-	RAGE::ScrNativeHandler handlers[7];
+	ScrNativeHandler handlers[7];
 	uint32_t numEntries1;
 	uint32_t numEntries2;
 	uint32_t _unknown;
@@ -136,7 +167,7 @@ struct NativeRegistration {
 };
 #pragma pack(pop)
 
-class NativeCallContext : public RAGE::ScrNativeCallContext
+class NativeCallContext : public ScrNativeCallContext
 {
 public:
 	NativeCallContext();
@@ -150,16 +181,16 @@ CFactory(CNativeInvoker)
 {
 public:
 
-	CNativeInvoker() { MessageBox(0, "Construct CNativeInvoker", "Constructor info", MB_OK); };
+	CNativeInvoker() { };
 
 	static bool OnLookAlive();
 
 	void Hook() override;
 	void Unhook() override;
 	void OnGameHook() override;
-	static void __fastcall BeforeRegisteringNatives(void* a1);
-	static void RegisterNativeHK(void* a1, void* a2);
-	RAGE::ScrNativeHandler GetNativeHandler(uint64_t oldHash);
+	static void BeforeRegisteringNatives(void* a1);
+	static void RegisterNativeHK(void* a1, void* a2, void* a3);
+	ScrNativeHandler GetNativeHandler(uint64_t oldHash);
 	void BeginCall();
 	template <typename T>
 	void PushArg(T&& value)
@@ -177,8 +208,8 @@ public:
 	int SearchDepth = 23;
 
 	NativeRegistration** registrationTable;
-	std::unordered_map<uint64_t, RAGE::ScrNativeHandler> foundHashCache;
-	void EndCall(RAGE::ScrNativeHash hash);
+	std::unordered_map<uint64_t, ScrNativeHandler> foundHashCache;
+	void EndCall(ScrNativeHash hash);
 
 	void* FixVectors;
 	void* GetNativeHandleCall;
@@ -186,6 +217,6 @@ public:
 	void DumpTable();
 private:
 	NativeCallContext CallContext;
-	std::unordered_map<RAGE::ScrNativeHash, RAGE::ScrNativeHandler> HandlerCache;
+	std::unordered_map<ScrNativeHash, ScrNativeHandler> HandlerCache;
 };
 extern CNativeInvoker* g_NativeInvoker;

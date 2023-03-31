@@ -23,7 +23,7 @@
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{d586ef6d-f138-4d46-b0ce-321654e149aa}</ProjectGuid>
     <RootNamespace>Client</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.22000.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -54,6 +54,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
@@ -72,8 +73,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);..\Libraries\minhook-master\build\VC17\lib\Debug;</LibraryPath>
-    <IncludePath>C:\Users\adm\Desktop\AME\Libraries\glm-master;$(VC_IncludePath);$(WindowsSDK_IncludePath);..\Libraries\enet-2.3.6\include;..\Libraries\minhook-master\include</IncludePath>
+    <IncludePath>..\Libraries\EABase-master\include\Common;..\Libraries\EASTL-master\include;..\Libraries\spdlog-1.x\include;..\Libraries\glm-master;$(VC_IncludePath);$(WindowsSDK_IncludePath);..\Libraries\enet-2.3.6\include;..\Libraries\minhook-master\include;D:\boost_1_81_0_b1_rc2</IncludePath>
     <OutDir>..\Build</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);D:\boost_1_81_0_b1_rc2;</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -116,7 +120,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;CLIENT_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>GTA.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -124,7 +128,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);libMinHook.x64.lib;d3d11.lib;</AdditionalDependencies>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);libMinHook.x64.lib;d3d11.lib;ntdll.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -147,32 +151,42 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="atPool.h" />
     <ClInclude Include="CBootstrap.h" />
     <ClInclude Include="CBaseFactory.h" />
     <ClInclude Include="CCleanWorld.h" />
     <ClInclude Include="CCrossmap.h" />
-    <ClInclude Include="CGameEvents.h" />
     <ClInclude Include="CGameFrame.h" />
     <ClInclude Include="CGameSkeleton.h" />
     <ClInclude Include="CGtaThread.h" />
     <ClInclude Include="CLevelLoader.h" />
     <ClInclude Include="CNativeInvoker.h" />
     <ClInclude Include="CNetworkForce.h" />
+    <ClInclude Include="CPoolManagement.h" />
     <ClInclude Include="CRender.h" />
-    <ClInclude Include="CRenderGame.h" />
-    <ClInclude Include="CScriptVM.h" />
+    <ClInclude Include="CScrEngine.h" />
+    <ClInclude Include="CSocialClub.h" />
+    <ClInclude Include="CSyncManager.h" />
+    <ClInclude Include="CSyncThread.h" />
     <ClInclude Include="d3d11.h" />
     <ClInclude Include="d3d11hook.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="GTA.h" />
+    <ClInclude Include="gta_vtables.h" />
     <ClInclude Include="HookFunction.h" />
     <ClInclude Include="Hooking.h" />
     <ClInclude Include="Hooking.Invoke.h" />
     <ClInclude Include="Hooking.Patterns.h" />
     <ClInclude Include="IATHook.h" />
+    <ClInclude Include="ida.h" />
+    <ClInclude Include="jooat.h" />
     <ClInclude Include="nativeList.h" />
+    <ClInclude Include="NodeHelper.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="CVGame.h" />
-    <ClInclude Include="CScriptHandlerMgr.h" />
+    <ClInclude Include="pgCollection.h" />
+    <ClInclude Include="RlMessageBuffer.h" />
+    <ClInclude Include="SyncTrees_Header.h" />
     <ClInclude Include="XBRVirtual.h" />
   </ItemGroup>
   <ItemGroup>
@@ -180,16 +194,18 @@
     <ClCompile Include="CBaseFactory.cpp" />
     <ClCompile Include="CCleanWorld.cpp" />
     <ClCompile Include="CCrossmap.cpp" />
-    <ClCompile Include="CGameEvents.cpp" />
     <ClCompile Include="CGameFrame.cpp" />
     <ClCompile Include="CGameSkeleton.cpp" />
     <ClCompile Include="CGtaThread.cpp" />
     <ClCompile Include="CLevelLoader.cpp" />
     <ClCompile Include="CNativeInvoker.cpp" />
     <ClCompile Include="CNetworkForce.cpp" />
+    <ClCompile Include="CPoolManagement.cpp" />
     <ClCompile Include="CRender.cpp" />
-    <ClCompile Include="CRenderGame.cpp" />
-    <ClCompile Include="CScriptVM.cpp" />
+    <ClCompile Include="CScrEngine.cpp" />
+    <ClCompile Include="CSocialClub.cpp" />
+    <ClCompile Include="CSyncManager.cpp" />
+    <ClCompile Include="CSyncThread.cpp" />
     <ClCompile Include="d3d11.cpp" />
     <ClCompile Include="d3d11hook.cpp" />
     <ClCompile Include="dllmain.cpp" />
@@ -198,12 +214,13 @@
     <ClCompile Include="Hooking.Patterns.cpp" />
     <ClCompile Include="IATHook.cpp" />
     <ClCompile Include="CVGame.cpp" />
-    <ClCompile Include="CScriptHandlerMgr.cpp" />
+    <ClCompile Include="NodeHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
   </ImportGroup>
 </Project>

@@ -1,6 +1,7 @@
 #include "CCleanWorld.h"
 #include "Hooking.h"
 #include <MinHook.h>
+#include <spdlog/spdlog.h>
 static char(*OPOPULATE_WORLD_WITH_VEHICLES)(void*, void*);
 char POPULATE_WORLD_WITH_VEHICLES(void* a1, void* a2) {
 	//printf("called POPULATE_WORLD_WITH_VEHICLES \n");
@@ -23,6 +24,9 @@ void __fastcall test() {
 
 }
 void CCleanWorld::Hook() {
+	
+	spdlog::info("CCleanWorld::Hook");
+
 	auto worldVehGen = hook::pattern("E8 ? ? ? ? EB 26 48 8D 15 ? ? ? ? 0F 28 D7 48 8B CE E8 ? ? ? ? EB 12 48 8D 15 ? ? ? ? 0F 28 D7 48 8B CE E8 ? ? ? ?").count(1).get(0).get<void>();
 	auto worldVehGenCall = hook::get_call(worldVehGen);
 	

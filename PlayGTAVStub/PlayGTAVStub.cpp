@@ -44,6 +44,7 @@ typedef BOOL(WINAPI* __CPW)(_In_opt_ LPCWSTR lpApplicationName,
 __CPW CreateProcessW_Original;
 static int call_count = 0;
 static DWORD last_thread = 0;
+static HANDLE MainThreadHandle = 0;
 BOOL
 WINAPI
 CreateProcessW_HK(
@@ -58,59 +59,51 @@ CreateProcessW_HK(
     _In_ LPSTARTUPINFOW lpStartupInfo,
     _Out_ LPPROCESS_INFORMATION lpProcessInformation
 ) {
-  
-    //#	Time of Day	Thread	Module	API	Return Value	Error	Duration
-  //  1	3:11 : 50.315 PM	1	steamclient.dll	CreateProcessW("D:\SteamLibrary\steamapps\common\Grand Theft Auto V\PlayGTAV.exe", ""D:\SteamLibrary\steamapps\common\Grand Theft Auto V\PlayGTAV.exe"", 0x00000000, 0x00000000, 0, 1028, 0x08034078, "D:\SteamLibrary\steamapps\common\Grand Theft Auto V", 0x0448f5e0, 0x0448f67c)	1		0.0032125
-  
-  // call_count++;
- //  MessageBox(0, "x64launcher", "PlayGTAVStub.cpp", MB_OK);
-  // auto name = std::wstring(lpApplicationName);
-  /* if (name.find(L"x64launcher") != std::wstring::npos)
-   { 
-       auto launchPath = PlayGTAVStub::GetLaunchPath("Software\\AME");
-       auto exeInj = launchPath.append("\\RoSLauncherInjector.exe");
-       MessageBox(0, "x64launcher", "PlayGTAVStub.cpp", MB_OK);
-   }*/
-   //else {
-       return CreateProcessW_Original(lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes, bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory,
-           lpStartupInfo, lpProcessInformation);
-   //}
- //  if (lpProcessInformation)
-  //   last_thread = lpProcessInformation->dwThreadId;
-   
-   // std::string samp = std::string("PlayGTAVStub::CreateProcessHK ").append(str2).append(" Creation flags:").append(std::to_string(dwCreationFlags));
-   // MessageBox(0, samp.c_str(), "PlayGTAVStub.cpp", MB_OK);
-    
-    //{
-    //   // MessageBox(0, "Found GTAV Launcher", "mata", MB_OK);
-    //  /*  auto launchPath = PlayGTAVStub::GetLaunchPath("Software\\AME");
-    //    auto exeInj = launchPath.append("\\RoSLauncherInjector.exe");
 
-    //    STARTUPINFO si;
-    //    PROCESS_INFORMATION pi;
+    //MessageBox(0, "PlayGTAV", "mata", MB_OK);
+    if (lpApplicationName) {
 
-    //    ZeroMemory(&si, sizeof(si));
-    //    si.cb = sizeof(si);
-    //    ZeroMemory(&pi, sizeof(pi));
-    //    std::wstring wsTmp(exeInj.begin(), exeInj.end());*/
+        auto hHandle =  CreateProcessW_Original(lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes, bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory,
+            lpStartupInfo, lpProcessInformation);
 
+        if (hHandle)
+        {
+            auto launchPath = PlayGTAVStub::GetLaunchPath("Software\\AME");
+            auto exeInj = launchPath.append("\\RoSLauncherInjector.exe");
 
-    //   // // Sleep(15);
-    //   ////  MessageBox(0, "PlayGTAVStub32::CreateProcessW_HK", "Means that should start injector x64.", MB_OK);
-    //   // CreateProcessW_Original(wsTmp.c_str(), NULL,           // Process handle not inheritable
-    //   //     NULL,           // Thread handle not inheritable
-    //   //     FALSE,          // Set handle inheritance to FALSE
-    //   //     0,              // No creation flags
-    //   //     NULL,           // Use parent's environment block
-    //   //     NULL,           // Use parent's starting directory 
-    //   //     0,
-    //   //     (LPSTARTUPINFOW)&si,            // Pointer to STARTUPINFO structure
-    //   //     &pi);      // Pointer to PROCESS_INFORMATION structure);
-    //   // //    LoadDll(launchPath, lpProcessInformation->dwProcessId);
-    //   //   //  MessageBox(0, "PlayGTAV started injector...", "Detached", MB_OK);
+            STARTUPINFO si;
+            PROCESS_INFORMATION pi;
 
+            ZeroMemory(&si, sizeof(si));
+            si.cb = sizeof(si);
+            ZeroMemory(&pi, sizeof(pi));
+            std::wstring wsTmp(exeInj.begin(), exeInj.end());
 
-    //} return result;
+            auto hInjector = CreateProcessW_Original(wsTmp.c_str(), NULL,
+                NULL,
+                FALSE,
+                0,
+                CREATE_NO_WINDOW,
+                NULL,
+                0,
+                (LPSTARTUPINFOW)&si,
+                &pi);
+
+            auto ret = WaitForSingleObject(pi.hProcess, INFINITE);
+            printf("WaitForSingleObject ret = %x\n", ret);
+            if (ret == WAIT_OBJECT_0)
+            {
+                printf("WaitForSingleObject ret ret == WAIT_OBJECT_0\n");
+            }
+           // MessageBox(0, "PlayGTAVStub32::ResumeThread_HK", "Means that should start injector x64.", MB_OK);
+            return hInjector;
+        }
+
+    }
+    else {
+        return CreateProcessW_Original(lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes, bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory,
+            lpStartupInfo, lpProcessInformation);
+    }
   
 }
 typedef BOOL(WINAPI* __ResumeThreadTypedef)(_In_ HANDLE hThread);
@@ -121,9 +114,9 @@ ResumeThread_HK(
     _In_ HANDLE hThread
 ) {
 
-    static bool called = false;
-    if (!called) {
-        auto launchPath = PlayGTAVStub::GetLaunchPath("Software\\AME");
+
+    if (hThread == MainThreadHandle) {
+       /* auto launchPath = PlayGTAVStub::GetLaunchPath("Software\\AME");
         auto exeInj = launchPath.append("\\RoSLauncherInjector.exe");
 
         STARTUPINFO si;
@@ -134,18 +127,26 @@ ResumeThread_HK(
         ZeroMemory(&pi, sizeof(pi));
         std::wstring wsTmp(exeInj.begin(), exeInj.end());
 
-        CreateProcessW(wsTmp.c_str(), NULL,
+        auto hHandle = CreateProcessW(wsTmp.c_str(), NULL,
             NULL,
             FALSE,
             0,
-            NULL,
+            CREATE_NO_WINDOW,
             NULL,
             0,
             (LPSTARTUPINFOW)&si,
             &pi);
-        called = true;
+
+        auto ret = WaitForSingleObject(pi.hProcess, INFINITE);
+        printf("WaitForSingleObject ret = %x\n", ret);
+        if (ret == WAIT_OBJECT_0)
+        {
+            printf("WaitForSingleObject ret ret == WAIT_OBJECT_0\n");
+        }
+        MessageBox(0, "PlayGTAVStub32::ResumeThread_HK", "Means that should start injector x64.", MB_OK);*/
+      
     }
-   // MessageBox(0, "PlayGTAVStub32::ResumeThread_HK", "Means that should start injector x64.", MB_OK);
+    //
 
     return ResumeThread_Original(hThread);
  /*   auto launchPath = PlayGTAVStub::GetLaunchPath("Software\\AME");

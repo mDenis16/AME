@@ -10,7 +10,7 @@
 void LoadDll(std::string clientDll, DWORD dwProcessId) {
     HANDLE Process = OpenProcess(PROCESS_ALL_ACCESS, FALSE, dwProcessId);
 
-    if (!Process) MessageBox(0, "Failed to OpenProcess", "CSteam::LoadDll", MB_OK);
+    if (!Process) MessageBox(0, "Failed to OpenProcess", "RoSLauncherInjector::LoadDll", MB_OK);
 
     // Allocate space in the process for our DLL 
     LPVOID Memory = LPVOID(VirtualAllocEx(Process, nullptr, MAX_PATH, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE));
@@ -123,24 +123,29 @@ DWORD GetLauncher() {
 }
 int main()
 {
-   // MessageBox(0, "RoSLauncherInjector::Main", "Means that injector started.", MB_OK);
-  
+    //MessageBox(0, "RoSLauncherInjector::Main", "Means that injector started.", MB_OK);
 
-      auto launchPath = GetLaunchPath("Software\\AME");
+
+    auto launchPath = GetLaunchPath("Software\\AME");
     launchPath.append("\\RoSLauncherStub.dll");
     DWORD launcher = 0;
     int Tries = 0;
-    while (!launcher && Tries < 15) {
-         launcher = GetLauncher();
+    while (!launcher && Tries < 500) {
+        launcher = GetLauncher();
+        std::string str{ "launcher " };
+        str.append(std::to_string(launcher).c_str());
+
+
         if (launcher)
         {
+           // MessageBox(0, str.c_str(), "mata", MB_OK);
             LoadDll(launchPath, launcher);
         }
-        Tries++;
-        Sleep(70);
     }
-    
+    Tries++;
+    Sleep(70);
 }
+   
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
 // Debug program: F5 or Debug > Start Debugging menu

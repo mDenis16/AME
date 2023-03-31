@@ -20,6 +20,37 @@
 
 namespace hook
 {
+	class executable_meta
+	{
+	private:
+		uintptr_t m_begin;
+		uintptr_t m_end;
+
+	public:
+		template<typename TReturn, typename TOffset>
+		TReturn* getRVA(TOffset rva)
+		{
+			return (TReturn*)(m_begin + rva);
+		}
+
+		explicit executable_meta(void* module)
+			: m_begin((uintptr_t)module)
+		{
+			PIMAGE_DOS_HEADER dosHeader = getRVA<IMAGE_DOS_HEADER>(0);
+			PIMAGE_NT_HEADERS ntHeader = getRVA<IMAGE_NT_HEADERS>(dosHeader->e_lfanew);
+
+			m_end = m_begin + ntHeader->OptionalHeader.SizeOfImage;
+		}
+
+		executable_meta(uintptr_t begin, uintptr_t end)
+			: m_begin(begin), m_end(end)
+		{
+		}
+
+		inline uintptr_t begin() const { return m_begin; }
+		inline uintptr_t end() const { return m_end; }
+	};
+
 	class pattern_match
 	{
 	private:

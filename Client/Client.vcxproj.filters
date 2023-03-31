@@ -40,9 +40,6 @@
     <Filter Include="Render\DirectX">
       <UniqueIdentifier>{841103de-71b7-46fc-914a-1417029cc1bb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Factories\CRender">
-      <UniqueIdentifier>{cbbe9355-96f5-4d0d-96be-8c94f66e6a92}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Factories\NativeInvoker">
       <UniqueIdentifier>{15c289b7-35e6-42f6-a056-ee18bb39833f}</UniqueIdentifier>
     </Filter>
@@ -52,17 +49,8 @@
     <Filter Include="Scripting">
       <UniqueIdentifier>{b95d054c-d05a-4b92-9580-1ec63becb129}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Scripting\CScriptFiber">
-      <UniqueIdentifier>{6da190ff-f948-42f4-b8a5-f0d71fdc6dfc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Factories\ScriptVM">
-      <UniqueIdentifier>{999f0bd4-01c1-4e82-8897-ee689eb46198}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Factories\GameEvents">
       <UniqueIdentifier>{82504497-c14d-46a1-adc9-82c33a7540ed}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Factories\ScriptVM\Ptclaudelu">
-      <UniqueIdentifier>{8964f24c-c711-49c9-a192-6b3088e4929f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Factories\CleanWorld">
       <UniqueIdentifier>{9c8dc8a3-d311-4550-8574-d6f68744d9e6}</UniqueIdentifier>
@@ -70,8 +58,38 @@
     <Filter Include="Factories\NetworkForce">
       <UniqueIdentifier>{6bcab976-8cff-4292-9691-f4811e00dbc6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Factories\NetGame">
-      <UniqueIdentifier>{a1faedc6-ab73-4d71-880c-8c25fa758ffc}</UniqueIdentifier>
+    <Filter Include="Factories\Pool">
+      <UniqueIdentifier>{9cefada0-caa7-44f9-bc62-069878797156}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Factories\NetworkPlayerManager">
+      <UniqueIdentifier>{5b5fa822-7bfc-4611-91f4-472a73164f6a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Factories\PlayerManager">
+      <UniqueIdentifier>{8d998fb2-11f2-4180-b02c-273f80e13415}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Factories\CloneObjectManager">
+      <UniqueIdentifier>{2e901e7d-ce0d-491c-9106-5f6a045b9e19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Factories\ScrEngine">
+      <UniqueIdentifier>{b7fdc1b8-b4c0-4f48-bcd8-0b5076f9a128}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="NewFilter1">
+      <UniqueIdentifier>{9e992197-15d0-48a6-b083-35a947fa41cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Factories\SyncManager">
+      <UniqueIdentifier>{fbaefb41-3c63-48b3-a992-e03a595794ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Helpers">
+      <UniqueIdentifier>{53a91f8e-08b3-4f9b-9d2b-c2432f08125e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Helpers\Nodes">
+      <UniqueIdentifier>{ba0eedc2-6614-4c01-bf42-bf36dfef8023}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Helpers\datanodes">
+      <UniqueIdentifier>{cdaa0666-95d5-4b61-9253-d98928f3ae91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CSocialClub">
+      <UniqueIdentifier>{6fa12a92-9f3e-4737-8a4c-f15772ec64db}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -120,9 +138,6 @@
     <ClInclude Include="d3d11hook.h">
       <Filter>Render\DirectX</Filter>
     </ClInclude>
-    <ClInclude Include="CRenderGame.h">
-      <Filter>Factories\CRender</Filter>
-    </ClInclude>
     <ClInclude Include="HookFunction.h">
       <Filter>Hooking</Filter>
     </ClInclude>
@@ -132,17 +147,8 @@
     <ClInclude Include="CGtaThread.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CScriptHandlerMgr.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CScriptVM.h">
-      <Filter>Factories\ScriptVM</Filter>
-    </ClInclude>
     <ClInclude Include="nativeList.h">
       <Filter>Factories\NativeInvoker</Filter>
-    </ClInclude>
-    <ClInclude Include="CGameEvents.h">
-      <Filter>Factories\GameEvents</Filter>
     </ClInclude>
     <ClInclude Include="XBRVirtual.h">
       <Filter>Header Files</Filter>
@@ -155,6 +161,48 @@
     </ClInclude>
     <ClInclude Include="CNetworkForce.h">
       <Filter>Factories\NetworkForce</Filter>
+    </ClInclude>
+    <ClInclude Include="CPoolManagement.h">
+      <Filter>Factories\Pool</Filter>
+    </ClInclude>
+    <ClInclude Include="jooat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CScrEngine.h">
+      <Filter>Factories\ScrEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="gta_vtables.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="atPool.h">
+      <Filter>RAGE</Filter>
+    </ClInclude>
+    <ClInclude Include="GTA.h">
+      <Filter>RAGE</Filter>
+    </ClInclude>
+    <ClInclude Include="CSyncManager.h">
+      <Filter>Factories\SyncManager</Filter>
+    </ClInclude>
+    <ClInclude Include="pgCollection.h">
+      <Filter>RAGE</Filter>
+    </ClInclude>
+    <ClInclude Include="ida.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NodeHelper.h">
+      <Filter>Helpers\Nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="RlMessageBuffer.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="SyncTrees_Header.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="CSyncThread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CSocialClub.h">
+      <Filter>CSocialClub</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -197,9 +245,6 @@
     <ClCompile Include="d3d11hook.cpp">
       <Filter>Render\DirectX</Filter>
     </ClCompile>
-    <ClCompile Include="CRenderGame.cpp">
-      <Filter>Factories\CRender</Filter>
-    </ClCompile>
     <ClCompile Include="HookFunction.cpp">
       <Filter>Hooking</Filter>
     </ClCompile>
@@ -209,15 +254,6 @@
     <ClCompile Include="CGtaThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CScriptHandlerMgr.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CScriptVM.cpp">
-      <Filter>Factories\ScriptVM</Filter>
-    </ClCompile>
-    <ClCompile Include="CGameEvents.cpp">
-      <Filter>Factories\GameEvents</Filter>
-    </ClCompile>
     <ClCompile Include="CCrossmap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -226,6 +262,24 @@
     </ClCompile>
     <ClCompile Include="CNetworkForce.cpp">
       <Filter>Factories\NetworkForce</Filter>
+    </ClCompile>
+    <ClCompile Include="CPoolManagement.cpp">
+      <Filter>Factories\Pool</Filter>
+    </ClCompile>
+    <ClCompile Include="CScrEngine.cpp">
+      <Filter>Factories\ScrEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="CSyncManager.cpp">
+      <Filter>Factories\SyncManager</Filter>
+    </ClCompile>
+    <ClCompile Include="NodeHelper.cpp">
+      <Filter>Helpers\Nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="CSyncThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CSocialClub.cpp">
+      <Filter>CSocialClub</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

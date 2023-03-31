@@ -221,7 +221,7 @@ void LoadDll(std::string clientDll, DWORD dwProcessId) {
 
 	//Let the program regain control of itself.
 	CloseHandle(Process);
-
+	
 	//Free the allocated memory.
 	VirtualFreeEx(Process, LPVOID(Memory), 0, MEM_RELEASE);
 }
@@ -306,11 +306,12 @@ void CLauncher::StubSteam() {
 
 
 	std::string samp("\"");
-	//"C:\Program Files (x86)\Steam\steam.exe" steam://rungameid/271590
-	auto steamPath = samp + GetSteamPath();
+	////"C:\Program Files (x86)\Steam\steam.exe" steam://rungameid/271590
+	//auto steamPath = samp + GetSteamPath();
 
 
-	steamPath.append("\\steam.exe\"");
-	steamPath.append(" ");
-	steamPath.append("steam://rungameid/271590");	system(steamPath.c_str());
+	//steamPath.append("\\steam.exe\"");
+	//steamPath.append(" ");
+	//steamPath.append("steam://rungameid/271590");
+	
 }

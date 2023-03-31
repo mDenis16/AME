@@ -1,6 +1,6 @@
 #include <array>
 constexpr auto NATIVE_COUNT = 6494;
-inline constexpr const RAGE::ScrNativeMapping CrossMapList[] = 
+inline constexpr const ScrNativeMapping CrossMapList[] = 
    {
        { 0x4EDE34FBADD967A6, 0x4EDE34FBADD967A6},
 { 0xE81651AD79516E48, 0xE81651AD79516E48},

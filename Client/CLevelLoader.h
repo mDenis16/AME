@@ -19,7 +19,7 @@ public:
 	void Hook() override;
 	void Unhook() override;
 	void OnGameHook() override;
-
+	void OnFrame();
 	void RequestLoad();
 	GAME_STATE state;
 

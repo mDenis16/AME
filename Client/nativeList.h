@@ -5,7 +5,7 @@
 #include "CNativeInvoker.h"
 
 template <typename Ret, typename ...Args>
-FORCEINLINE Ret invoke(RAGE::ScrNativeHash hash, Args &&...args)
+FORCEINLINE Ret invoke(ScrNativeHash hash, Args &&...args)
 {
 	CBaseFactory<CNativeInvoker>::Get().BeginCall();
 	(CBaseFactory<CNativeInvoker>::Get().PushArg(std::forward<Args>(args)), ...);
@@ -45,7 +45,6 @@ struct Vector3
 };
 typedef DWORD Void;
 typedef DWORD Any;
-typedef DWORD uint;
 typedef DWORD Hash;
 typedef int GameEntity;
 typedef int GamePlayer;
@@ -69,7 +68,7 @@ typedef int TaskSequence;
 typedef int ColourIndex;
 typedef int Sphere;
 typedef int ScrHandle;
-using vector3 = Vector3;
+
 //using Vector3 = glm::vec3;
 
 namespace SYSTEM
@@ -1385,7 +1384,7 @@ namespace BRAIN
 
 	static float GET_PHONE_GESTURE_ANIM_TOTAL_TIME(GamePed ped) { return invoke<float>(0x1EE0F68A7C25DEC6, ped); } // 0x1EE0F68A7C25DEC6 0xEF8C3959 b323
 
-	static vector3 GET_SCRIPTED_COVER_POINT_COORDS(ScrHandle coverpoint) { return invoke<Vector3>(0x594A1028FC2A3E85, coverpoint); } // 0x594A1028FC2A3E85 0xC6B6CCC1 b323
+	static Vector3 GET_SCRIPTED_COVER_POINT_COORDS(ScrHandle coverpoint) { return invoke<Vector3>(0x594A1028FC2A3E85, coverpoint); } // 0x594A1028FC2A3E85 0xC6B6CCC1 b323
 
 	// Gets the status of a script-assigned task. The hash does not seem to match the actual native name, but is assigned hardcoded from the executable during task creation.
 	//
@@ -2778,7 +2777,7 @@ namespace BRAIN
 
 	// For a full list, see here: pastebin.com/Tp0XpBMN
 	// For a full list of the points, see here: goo.gl/wIH0vn
-	static bool WAYPOINT_RECORDING_GET_COORD(const char* name, int point, vector3* coord) { return invoke<bool>(0x2FB897405C90B361, name, point, coord); } // 0x2FB897405C90B361 0x19266913 b323
+	static bool WAYPOINT_RECORDING_GET_COORD(const char* name, int point, Vector3* coord) { return invoke<bool>(0x2FB897405C90B361, name, point, coord); } // 0x2FB897405C90B361 0x19266913 b323
 
 	// For a full list, see here: pastebin.com/Tp0XpBMN
 	// For a full list of the points, see here: goo.gl/wIH0vn
@@ -2926,7 +2925,7 @@ namespace CAM
 
 	static float GET_CAM_ANIM_CURRENT_PHASE(Cam cam) { return invoke<float>(0xA10B2DB49E92A6B0, cam); } // 0xA10B2DB49E92A6B0 0x345F72D0 b323
 
-	static vector3 GET_CAM_COORD(Cam cam) { return invoke<Vector3>(0xBAC038F7459AE5AE, cam); } // 0xBAC038F7459AE5AE 0x7C40F09C b323
+	static Vector3 GET_CAM_COORD(Cam cam) { return invoke<Vector3>(0xBAC038F7459AE5AE, cam); } // 0xBAC038F7459AE5AE 0x7C40F09C b323
 
 	static float GET_CAM_FAR_CLIP(Cam cam) { return invoke<float>(0xB60A9CFEB21CA6AA, cam); } // 0xB60A9CFEB21CA6AA 0x09F119B8 b323
 
@@ -2937,7 +2936,7 @@ namespace CAM
 	static float GET_CAM_NEAR_CLIP(Cam cam) { return invoke<float>(0xC520A34DAFBF24B1, cam); } // 0xC520A34DAFBF24B1 0xCFCD35EE b323
 
 	// The last parameter, as in other "ROT" methods, is usually 2.
-	static vector3 GET_CAM_ROT(Cam cam, int rotationOrder) { return invoke<Vector3>(0x7D304C1C955E3E12, cam, rotationOrder); } // 0x7D304C1C955E3E12 0xDAC84C9F b323
+	static Vector3 GET_CAM_ROT(Cam cam, int rotationOrder) { return invoke<Vector3>(0x7D304C1C955E3E12, cam, rotationOrder); } // 0x7D304C1C955E3E12 0xDAC84C9F b323
 
 	// I named the beginning from Any to BOOL as this native is used in an if statement as well.
 	static bool GET_CAM_SPLINE_NODE_INDEX(Cam cam) { return invoke<bool>(0xB22B17DF858716A6, cam); } // 0xB22B17DF858716A6 0xF8AEB6BD b323
@@ -2960,7 +2959,7 @@ namespace CAM
 	// }
 	static Any _0xEE778F8C7E1142E2(Any p0) { return invoke<Any>(0xEE778F8C7E1142E2, p0); } // 0xEE778F8C7E1142E2 0xF3B148A6 b323
 
-	static vector3 _GET_GAMEPLAY_CAM_COORDS() { return invoke<Vector3>(0xA200EB1EE790F448); } // 0xA200EB1EE790F448 0x9C84BDA0 b323
+	static Vector3 _GET_GAMEPLAY_CAM_COORDS() { return invoke<Vector3>(0xA200EB1EE790F448); } // 0xA200EB1EE790F448 0x9C84BDA0 b323
 
 	// gets some camera far clip
 	static float _0xDFC8CBC606FDB0FC() { return invoke<float>(0xDFC8CBC606FDB0FC); } // 0xDFC8CBC606FDB0FC 0x46CB3A49 b323
@@ -2983,11 +2982,11 @@ namespace CAM
 	// p0 seems to consistently be 2 across scripts
 	//
 	// Function is called faily often by CAM::CREATE_CAM_WITH_PARAMS
-	static vector3 _GET_GAMEPLAY_CAM_ROT(int rotationOrder) { return invoke<Vector3>(0x5B4E4C817FCC2DFB, rotationOrder); } // 0x5B4E4C817FCC2DFB 0x1FFBEFC5 b323
+	static Vector3 _GET_GAMEPLAY_CAM_ROT(int rotationOrder) { return invoke<Vector3>(0x5B4E4C817FCC2DFB, rotationOrder); } // 0x5B4E4C817FCC2DFB 0x1FFBEFC5 b323
 
 	static float _0x5F35F6732C3FBBA0(Any p0) { return invoke<float>(0x5F35F6732C3FBBA0, p0); } // 0x5F35F6732C3FBBA0 0x23E3F106 b323
 
-	static vector3 _0x26903D9CD1175F2C(Any p0, Any p1) { return invoke<Vector3>(0x26903D9CD1175F2C, p0, p1); } // 0x26903D9CD1175F2C 0xACADF916 b323
+	static Vector3 _0x26903D9CD1175F2C(Any p0, Any p1) { return invoke<Vector3>(0x26903D9CD1175F2C, p0, p1); } // 0x26903D9CD1175F2C 0xACADF916 b323
 
 	static float _GET_GAMEPLAY_CAM_ZOOM() { return invoke<float>(0x7EC52CC40597D170); } // 0x7EC52CC40597D170 0x33951005 b323
 
@@ -3012,7 +3011,7 @@ namespace CAM
 	// 4 - First Person
 	static int GET_FOLLOW_VEHICLE_CAM_VIEW_MODE() { return invoke<int>(0xA4FF579AC0E3AAAE); } // 0xA4FF579AC0E3AAAE 0xA4B4DB03 b323
 
-	static vector3 GET_GAMEPLAY_CAM_COORD() { return invoke<Vector3>(0x14D6F5678D8F1B37); } // 0x14D6F5678D8F1B37 0x9388CF79 b323
+	static Vector3 GET_GAMEPLAY_CAM_COORD() { return invoke<Vector3>(0x14D6F5678D8F1B37); } // 0x14D6F5678D8F1B37 0x9388CF79 b323
 
 	static float GET_GAMEPLAY_CAM_FOV() { return invoke<float>(0x65019750A0324133); } // 0x65019750A0324133 0x4D6B3BFA b323
 
@@ -3030,7 +3029,7 @@ namespace CAM
 	// 2-Pitch(X): -70.000092
 	// 2-Roll(Y): -0.000002
 	// 2-Yaw(Z): -43.886467
-	static vector3 GET_GAMEPLAY_CAM_ROT(int rotationOrder) { return invoke<Vector3>(0x837765A25378F0BB, rotationOrder); } // 0x837765A25378F0BB 0x13A010B5 b323
+	static Vector3 GET_GAMEPLAY_CAM_ROT(int rotationOrder) { return invoke<Vector3>(0x837765A25378F0BB, rotationOrder); } // 0x837765A25378F0BB 0x13A010B5 b323
 
 	static Cam GET_RENDERING_CAM() { return invoke<Cam>(0x5234F9F10919EABA); } // 0x5234F9F10919EABA 0x0FCF4DF1 b323
 
@@ -3747,7 +3746,7 @@ namespace DATAFILE
 
 	static void _ARRAY_VALUE_ADD_STRING(Any* arrayData, const char* value) { invoke<Void>(0x2F0661C155AEEEAA, arrayData, value); } // 0x2F0661C155AEEEAA 0xF3C01350 b323
 
-	static void _ARRAY_VALUE_ADD_VECTOR3(Any* arrayData, float valueX, float valueY, float valueZ) { invoke<Void>(0x407F8D034F70F0C2, arrayData, valueX, valueY, valueZ); } // 0x407F8D034F70F0C2 0x16F464B6 b323
+	static void _ARRAY_VALUE_ADD_Vector3(Any* arrayData, float valueX, float valueY, float valueZ) { invoke<Void>(0x407F8D034F70F0C2, arrayData, valueX, valueY, valueZ); } // 0x407F8D034F70F0C2 0x16F464B6 b323
 
 	static bool _ARRAY_VALUE_GET_BOOLEAN(Any* arrayData, int arrayIndex) { return invoke<bool>(0x50C1B2874E50C114, arrayData, arrayIndex); } // 0x50C1B2874E50C114 0xA2E5F921 b323
 
@@ -3771,7 +3770,7 @@ namespace DATAFILE
 	// 7 = Array
 	static int _ARRAY_VALUE_GET_TYPE(Any* arrayData, int arrayIndex) { return invoke<int>(0x3A0014ADB172A3C5, arrayData, arrayIndex); } // 0x3A0014ADB172A3C5 0xFA2402C8 b323
 
-	static vector3 _ARRAY_VALUE_GET_VECTOR3(Any* arrayData, int arrayIndex) { return invoke<Vector3>(0x8D2064E5B64A628A, arrayData, arrayIndex); } // 0x8D2064E5B64A628A 0x80E3DA55 b323
+	static Vector3 _ARRAY_VALUE_GET_Vector3(Any* arrayData, int arrayIndex) { return invoke<Vector3>(0x8D2064E5B64A628A, arrayData, arrayIndex); } // 0x8D2064E5B64A628A 0x80E3DA55 b323
 
 	static Any* _OBJECT_VALUE_ADD_ARRAY(Any* objectData, const char* key) { return invoke<Any*>(0x5B11728527CA6E5F, objectData, key); } // 0x5B11728527CA6E5F 0x03939B8D b323
 
@@ -3799,7 +3798,7 @@ namespace DATAFILE
 	// 7 = Array
 	static int _OBJECT_VALUE_GET_TYPE(Any* objectData, const char* key) { return invoke<int>(0x031C55ED33227371, objectData, key); } // 0x031C55ED33227371 0x2678342A b323
 
-	static vector3 _OBJECT_VALUE_GET_VECTOR3(Any* objectData, const char* key) { return invoke<Vector3>(0x46CD3CB66E0825CC, objectData, key); } // 0x46CD3CB66E0825CC 0xE84A127A b323
+	static Vector3 _OBJECT_VALUE_GET_Vector3(Any* objectData, const char* key) { return invoke<Vector3>(0x46CD3CB66E0825CC, objectData, key); } // 0x46CD3CB66E0825CC 0xE84A127A b323
 
 	static void _OBJECT_VALUE_ADD_BOOLEAN(Any* objectData, const char* key, bool value) { invoke<Void>(0x35124302A556A325, objectData, key, value); } // 0x35124302A556A325 0x9B29D99B b323
 
@@ -3809,7 +3808,7 @@ namespace DATAFILE
 
 	static void _OBJECT_VALUE_ADD_STRING(Any* objectData, const char* key, const char* value) { invoke<Void>(0x8FF3847DADD8E30C, objectData, key, value); } // 0x8FF3847DADD8E30C 0xD437615C b323
 
-	static void _OBJECT_VALUE_ADD_VECTOR3(Any* objectData, const char* key, float valueX, float valueY, float valueZ) { invoke<Void>(0x4CD49B76338C7DEE, objectData, key, valueX, valueY, valueZ); } // 0x4CD49B76338C7DEE 0x75FC6C3C b323
+	static void _OBJECT_VALUE_ADD_Vector3(Any* objectData, const char* key, float valueX, float valueY, float valueZ) { invoke<Void>(0x4CD49B76338C7DEE, objectData, key, valueX, valueY, valueZ); } // 0x4CD49B76338C7DEE 0x75FC6C3C b323
 
 	static void _0x6CC86E78358D5119() { invoke<Void>(0x6CC86E78358D5119); } // 0x6CC86E78358D5119 b323
 
@@ -4187,7 +4186,7 @@ namespace ENTITY
 	// Animations List : www.ls-multiplayer.com/dev/index.php?section=3
 	static float GET_ANIM_DURATION(const char* animDict, const char* animName) { return invoke<float>(0xFEDDF04D62B8D790, animDict, animName); } // 0xFEDDF04D62B8D790 0x8B5E3E3D b323
 
-	static vector3 GET_COLLISION_NORMAL_OF_LAST_HIT_FOR_ENTITY(GameEntity entity) { return invoke<Vector3>(0xE465D4AB7CA6AE72, entity); } // 0xE465D4AB7CA6AE72 0xAB415C07 b323
+	static Vector3 GET_COLLISION_NORMAL_OF_LAST_HIT_FOR_ENTITY(GameEntity entity) { return invoke<Vector3>(0xE465D4AB7CA6AE72, entity); } // 0xE465D4AB7CA6AE72 0xAB415C07 b323
 
 	static int GET_ENTITY_ALPHA(GameEntity entity) { return invoke<int>(0x5A47B3B5E63E94C6, entity); } // 0x5A47B3B5E63E94C6 0x1560B017 b323
 
@@ -4264,19 +4263,19 @@ namespace ENTITY
 	// I doubt that the function is case-sensitive, since I found a "Chassis" and a "chassis". - Just tested: Definitely not case-sensitive.
 	static int GET_ENTITY_BONE_INDEX_BY_NAME(GameEntity entity, const char* boneName) { return invoke<int>(0xFB71170B7E76ACBA, entity, boneName); } // 0xFB71170B7E76ACBA 0xE4ECAC22 b323
 
-	static vector3 _0x46F8696933A63C9B(Any p0, Any p1) { return invoke<Vector3>(0x46F8696933A63C9B, p0, p1); } // 0x46F8696933A63C9B b877
+	static Vector3 _0x46F8696933A63C9B(Any p0, Any p1) { return invoke<Vector3>(0x46F8696933A63C9B, p0, p1); } // 0x46F8696933A63C9B b877
 
-	static vector3 _0xCE6294A232D03786(Any p0, Any p1) { return invoke<Vector3>(0xCE6294A232D03786, p0, p1); } // 0xCE6294A232D03786 b791
+	static Vector3 _0xCE6294A232D03786(Any p0, Any p1) { return invoke<Vector3>(0xCE6294A232D03786, p0, p1); } // 0xCE6294A232D03786 b791
 
 	static Any _0xD95CC5D2AB15A09F(Any p0) { return invoke<Any>(0xD95CC5D2AB15A09F, p0); } // 0xD95CC5D2AB15A09F b757
 
 	static bool GET_ENTITY_COLLISION_DISABLED(GameEntity entity) { return invoke<bool>(0xCCF1E97BEFDAE480, entity); } // 0xCCF1E97BEFDAE480 0xE8C0C629 b323
 
 	// p1 = !IS_ENTITY_DEAD
-	static vector3 GET_ENTITY_COORDS(GameEntity entity, bool alive) { return invoke<Vector3>(0x3FEF770D40960D5A, entity, alive); } // 0x3FEF770D40960D5A 0x1647F1CB b323
+	static Vector3 GET_ENTITY_COORDS(GameEntity entity, bool alive) { return invoke<Vector3>(0x3FEF770D40960D5A, entity, alive); } // 0x3FEF770D40960D5A 0x1647F1CB b323
 
 	// Gets the entity's forward vector.
-	static vector3 GET_ENTITY_FORWARD_VECTOR(GameEntity entity) { return invoke<Vector3>(0x0A794A5A57F8DF91, entity); } // 0x0A794A5A57F8DF91 0x84DCECBF b323
+	static Vector3 GET_ENTITY_FORWARD_VECTOR(GameEntity entity) { return invoke<Vector3>(0x0A794A5A57F8DF91, entity); } // 0x0A794A5A57F8DF91 0x84DCECBF b323
 
 	// Gets the X-component of the entity's forward vector.
 	static float GET_ENTITY_FORWARD_X(GameEntity entity) { return invoke<float>(0x8BB4EF4214E0E6D5, entity); } // 0x8BB4EF4214E0E6D5 0x49FAE914 b323
@@ -4317,7 +4316,7 @@ namespace ENTITY
 	// Returns the LOD distance of an entity.
 	static int GET_ENTITY_LOD_DIST(GameEntity entity) { return invoke<int>(0x4159C2762B5791D6, entity); } // 0x4159C2762B5791D6 0x4DA3D51F b323
 
-	static void GET_ENTITY_MATRIX(GameEntity entity, vector3* rightVector, vector3* forwardVector, vector3* upVector, vector3* position) { invoke<Void>(0xECB2FC7235A7D137, entity, rightVector, forwardVector, upVector, position); } // 0xECB2FC7235A7D137 0xEB9EB001 b323
+	static void GET_ENTITY_MATRIX(GameEntity entity, Vector3* rightVector, Vector3* forwardVector, Vector3* upVector, Vector3* position) { invoke<Void>(0xECB2FC7235A7D137, entity, rightVector, forwardVector, upVector, position); } // 0xECB2FC7235A7D137 0xEB9EB001 b323
 
 	// Return an integer value of entity's maximum health.
 	//
@@ -4369,9 +4368,9 @@ namespace ENTITY
 	// www.allstar.fiu.edu/aero/images/pic5-1.gif
 	//
 	// I don't know why it returns a Vec3, but sometimes the values x and y go negative, yet they're always zero. Just use GET_ENTITY_PITCH and GET_ENTITY_ROLL for pitch and roll.
-	static vector3 GET_ENTITY_ROTATION(GameEntity entity, int rotationOrder) { return invoke<Vector3>(0xAFBD61CC738D9EB9, entity, rotationOrder); } // 0xAFBD61CC738D9EB9 0x8FF45B04 b323
+	static Vector3 GET_ENTITY_ROTATION(GameEntity entity, int rotationOrder) { return invoke<Vector3>(0xAFBD61CC738D9EB9, entity, rotationOrder); } // 0xAFBD61CC738D9EB9 0x8FF45B04 b323
 
-	static vector3 GET_ENTITY_ROTATION_VELOCITY(GameEntity entity) { return invoke<Vector3>(0x213B91045D09B983, entity); } // 0x213B91045D09B983 0x9BF8A73F b323
+	static Vector3 GET_ENTITY_ROTATION_VELOCITY(GameEntity entity) { return invoke<Vector3>(0x213B91045D09B983, entity); } // 0x213B91045D09B983 0x9BF8A73F b323
 
 	// All ambient entities in-world seem to have the same value for the second argument (Any *script), depending on when the scripthook was activated/re-activated. I've seen numbers from ~5 to almost 70 when the value was translated with to_string. The function return value seems to always be 0.
 	static const char* GET_ENTITY_SCRIPT(GameEntity entity, ScrHandle* script) { return invoke<const char*>(0xA6E9C38DB51D7748, entity, script); } // 0xA6E9C38DB51D7748 0xB7F70784 b323
@@ -4388,7 +4387,7 @@ namespace ENTITY
 	static float GET_ENTITY_SPEED(GameEntity entity) { return invoke<float>(0xD5037BA82E12416F, entity); } // 0xD5037BA82E12416F 0x9E1E4798 b323
 
 	// Relative can be used for getting speed relative to the frame of the vehicle, to determine for example, if you are going in reverse (-y speed) or not (+y speed).
-	static vector3 GET_ENTITY_SPEED_VECTOR(GameEntity entity, bool relative) { return invoke<Vector3>(0x9A8D700A51CB7B0D, entity, relative); } // 0x9A8D700A51CB7B0D 0x3ED2B997 b323
+	static Vector3 GET_ENTITY_SPEED_VECTOR(GameEntity entity, bool relative) { return invoke<Vector3>(0x9A8D700A51CB7B0D, entity, relative); } // 0x9A8D700A51CB7B0D 0x3ED2B997 b323
 
 	// Get how much of the entity is submerged.  1.0f is whole entity.
 	static float GET_ENTITY_SUBMERGED_LEVEL(GameEntity entity) { return invoke<float>(0xE81AFC1BC4CC41CE, entity); } // 0xE81AFC1BC4CC41CE 0x0170F68C b323
@@ -4402,7 +4401,7 @@ namespace ENTITY
 
 	static float GET_ENTITY_UPRIGHT_VALUE(GameEntity entity) { return invoke<float>(0x95EED5A694951F9F, entity); } // 0x95EED5A694951F9F 0xF4268190 b323
 
-	static vector3 GET_ENTITY_VELOCITY(GameEntity entity) { return invoke<Vector3>(0x4805D2B1D8CF94A9, entity); } // 0x4805D2B1D8CF94A9 0xC14C9B6B b323
+	static Vector3 GET_ENTITY_VELOCITY(GameEntity entity) { return invoke<Vector3>(0x4805D2B1D8CF94A9, entity); } // 0x4805D2B1D8CF94A9 0xC14C9B6B b323
 
 	static Hash GET_LAST_MATERIAL_HIT_BY_ENTITY(GameEntity entity) { return invoke<Hash>(0x5C3D0A935F535C4C, entity); } // 0x5C3D0A935F535C4C 0xC0E3AA47 b323
 
@@ -4416,14 +4415,14 @@ namespace ENTITY
 	// posX is given as 50
 	// entity's x coord is 40
 	// the returned x coord will then be 10 or -10, not sure haven't used this in a while (think it is 10 though).
-	static vector3 GET_OFFSET_FROM_ENTITY_GIVEN_WORLD_COORDS(GameEntity entity, float posX, float posY, float posZ) { return invoke<Vector3>(0x2274BC1C4885E333, entity, posX, posY, posZ); } // 0x2274BC1C4885E333 0x6477EC9E b323
+	static Vector3 GET_OFFSET_FROM_ENTITY_GIVEN_WORLD_COORDS(GameEntity entity, float posX, float posY, float posZ) { return invoke<Vector3>(0x2274BC1C4885E333, entity, posX, posY, posZ); } // 0x2274BC1C4885E333 0x6477EC9E b323
 
 	// Offset values are relative to the entity.
 	//
 	// x = left/right
 	// y = forward/backward
 	// z = up/down
-	static vector3 GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(GameEntity entity, float offsetX, float offsetY, float offsetZ) { return invoke<Vector3>(0x1899F328B0E12848, entity, offsetX, offsetY, offsetZ); } // 0x1899F328B0E12848 0xABCF043A b323
+	static Vector3 GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(GameEntity entity, float offsetX, float offsetY, float offsetZ) { return invoke<Vector3>(0x1899F328B0E12848, entity, offsetX, offsetY, offsetZ); } // 0x1899F328B0E12848 0xABCF043A b323
 
 	// Simply returns whatever is passed to it (Regardless of whether the handle is valid or not).
 	static Object GET_OBJECT_INDEX_FROM_ENTITY_INDEX(GameEntity entity) { return invoke<Object>(0xD7E3B9735C0F89D6, entity); } // 0xD7E3B9735C0F89D6 0xBC5A9C58 b323
@@ -4435,7 +4434,7 @@ namespace ENTITY
 	static Vehicle GET_VEHICLE_INDEX_FROM_ENTITY_INDEX(GameEntity entity) { return invoke<Vehicle>(0x4B53F92932ADFAC0, entity); } // 0x4B53F92932ADFAC0 0xC69CF43D b323
 
 	// Returns the coordinates of an entity-bone.
-	static vector3 GET_WORLD_POSITION_OF_ENTITY_BONE(GameEntity entity, int boneIndex) { return invoke<Vector3>(0x44A8FCB8ED227738, entity, boneIndex); } // 0x44A8FCB8ED227738 0x7C6339DF b323
+	static Vector3 GET_WORLD_POSITION_OF_ENTITY_BONE(GameEntity entity, int boneIndex) { return invoke<Vector3>(0x44A8FCB8ED227738, entity, boneIndex); } // 0x44A8FCB8ED227738 0x7C6339DF b323
 
 	// if (ENTITY::HAS_ANIM_EVENT_FIRED(PLAYER::PLAYER_PED_ID(), GAMEPLAY::GET_HASH_KEY("CreateObject")))
 	static bool HAS_ANIM_EVENT_FIRED(GameEntity entity, Hash actionHash) { return invoke<bool>(0xEAF4CD9EA3E7E922, entity, actionHash); } // 0xEAF4CD9EA3E7E922 0x66571CA0 b323
@@ -5140,7 +5139,7 @@ namespace FIRE
 	static void ADD_OWNED_EXPLOSION(GamePed ped, float x, float y, float z, int explosionType, float damageScale, bool isAudible, bool isInvisible, float cameraShake) { invoke<Void>(0x172AA1B624FA1013, ped, x, y, z, explosionType, damageScale, isAudible, isInvisible, cameraShake); } // 0x172AA1B624FA1013 0x27EE0D67 b323
 
 	// Returns TRUE if it found something. FALSE if not.
-	static bool GET_CLOSEST_FIRE_POS(vector3* outPosition, float x, float y, float z) { return invoke<bool>(0x352A9F6BCF90081F, outPosition, x, y, z); } // 0x352A9F6BCF90081F 0xC4977B47 b323
+	static bool GET_CLOSEST_FIRE_POS(Vector3* outPosition, float x, float y, float z) { return invoke<bool>(0x352A9F6BCF90081F, outPosition, x, y, z); } // 0x352A9F6BCF90081F 0xC4977B47 b323
 
 	static int GET_NUMBER_OF_FIRES_IN_RANGE(float x, float y, float z, float radius) { return invoke<int>(0x50CAD495A460B305, x, y, z, radius); } // 0x50CAD495A460B305 0x654D93B7 b323
 
@@ -5602,7 +5601,7 @@ namespace GRAPHICS
 
 	static void _0xE82728F0DE75D13A(Any p0, Any p1, Any p2, Any p3, Any p4, Any p5, Any p6, Any p7, Any p8, Any p9, Any p10, Any p11, Any p12, Any p13, Any p14, Any p15, Any p16, Any p17, Any p18, Any p19, Any p20, Any p21, Any p22, Any p23, Any p24) { invoke<Void>(0xE82728F0DE75D13A, p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24); } // 0xE82728F0DE75D13A b573
 
-	static void _0x799017F9E3B10112(Any p0, Any p1, Any p2, Any p3, Any p4, Any p5, Any p6, Any p7) { invoke<Void>(0x799017F9E3B10112, p0, p1, p2, p3, p4, p5, p6, p7); } // 0x799017F9E3B10112 b463
+	static void _DRAW_SPHERE(float x, float y, float z, float radius, int r, int g, int b, float opacity) { invoke<Void>(0x799017F9E3B10112, x,y, z, radius, r, g, b, opacity); } // 0x799017F9E3B10112 b463
 
 	// x/y/z - Location of a vertex (in world coords), presumably.
 	// ----------------
@@ -5871,7 +5870,7 @@ namespace GRAPHICS
 	// For .NET users...
 	//
 	// VB:
-	// Public Shared Function World3DToScreen2d(pos as vector3) As Vector2
+	// Public Shared Function World3DToScreen2d(pos as Vector3) As Vector2
 	//
 	//         Dim x2dp, y2dp As New Native.OutputArgument
 	//
@@ -5921,7 +5920,7 @@ namespace GRAPHICS
 	// Returns the texture resolution of the passed texture dict+name.
 	//
 	// Note: Most texture resolutions are doubled compared to the console version of the game.
-	static vector3 GET_TEXTURE_RESOLUTION(const char* textureDict, const char* textureName) { return invoke<Vector3>(0x35736EE65BD00C11, textureDict, textureName); } // 0x35736EE65BD00C11 0x096DAA4D b323
+	static Vector3 GET_TEXTURE_RESOLUTION(const char* textureDict, const char* textureName) { return invoke<Vector3>(0x35736EE65BD00C11, textureDict, textureName); } // 0x35736EE65BD00C11 0x096DAA4D b323
 
 	// Only use for this in the PC scripts is:
 	//
@@ -5950,7 +5949,7 @@ namespace GRAPHICS
 
 	static Any _0xA4819F5E23E2FFAD() { return invoke<Any>(0xA4819F5E23E2FFAD); } // 0xA4819F5E23E2FFAD 0xA08B46AD b323
 
-	static vector3 _0xA4664972A9B8F8BA(Any p0) { return invoke<Vector3>(0xA4664972A9B8F8BA, p0); } // 0xA4664972A9B8F8BA 0xECD470F0 b323
+	static Vector3 _0xA4664972A9B8F8BA(Any p0) { return invoke<Vector3>(0xA4664972A9B8F8BA, p0); } // 0xA4664972A9B8F8BA 0xECD470F0 b323
 
 	// Only used in the golf and golf_mp script
 	static void _0x12995F2E53FFA601(int p0, int p1, int p2, int p3, int p4, int p5, int p6, int p7, int p8, int p9, int p10, int p11) { invoke<Void>(0x12995F2E53FFA601, p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11); } // 0x12995F2E53FFA601 0x804F444C b323
@@ -7374,9 +7373,9 @@ namespace UI
 
 	static int GET_BLIP_HUD_COLOUR(Blip blip) { return invoke<int>(0x729B5F1EFBC0AAEE, blip); } // 0x729B5F1EFBC0AAEE 0xE88B4BC2 b323
 
-	static vector3 GET_BLIP_INFO_ID_COORD(Blip blip) { return invoke<Vector3>(0xFA7C7F0AADF25D09, blip); } // 0xFA7C7F0AADF25D09 0xB7374A66 b323
+	static Vector3 GET_BLIP_INFO_ID_COORD(Blip blip) { return invoke<Vector3>(0xFA7C7F0AADF25D09, blip); } // 0xFA7C7F0AADF25D09 0xB7374A66 b323
 
-	static vector3 GET_BLIP_COORDS(Blip blip) { return invoke<Vector3>(0x586AFE3FF72D996E, blip); } // 0x586AFE3FF72D996E 0xEF6FF47B b323
+	static Vector3 GET_BLIP_COORDS(Blip blip) { return invoke<Vector3>(0x586AFE3FF72D996E, blip); } // 0x586AFE3FF72D996E 0xEF6FF47B b323
 
 	static int GET_BLIP_INFO_ID_DISPLAY(Blip blip) { return invoke<int>(0x1E314167F701DC3B, blip); } // 0x1E314167F701DC3B 0xD0FC19F4 b323
 
@@ -7468,7 +7467,7 @@ namespace UI
 	// HUD colors and their values: pastebin.com/d9aHPbXN
 	static void GET_HUD_COLOUR(int hudColorIndex, int* r, int* g, int* b, int* a) { invoke<Void>(0x7C9C91AB74A0360F, hudColorIndex, r, g, b, a); } // 0x7C9C91AB74A0360F 0x63F66A0B b323
 
-	static vector3 GET_HUD_COMPONENT_POSITION(int id) { return invoke<Vector3>(0x223CA69A8C4417FD, id); } // 0x223CA69A8C4417FD 0x080DCED6 b323
+	static Vector3 GET_HUD_COMPONENT_POSITION(int id) { return invoke<Vector3>(0x223CA69A8C4417FD, id); } // 0x223CA69A8C4417FD 0x080DCED6 b323
 
 	// World to relative screen coords
 	//
@@ -7519,7 +7518,7 @@ namespace UI
 
 	static int GET_NUMBER_OF_ACTIVE_BLIPS() { return invoke<int>(0x9A3FF3DE163034E8); } // 0x9A3FF3DE163034E8 0x144020FA b323
 
-	static vector3 _0x5BFF36D6ED83E0AE() { return invoke<Vector3>(0x5BFF36D6ED83E0AE); } // 0x5BFF36D6ED83E0AE b323
+	static Vector3 _0x5BFF36D6ED83E0AE() { return invoke<Vector3>(0x5BFF36D6ED83E0AE); } // 0x5BFF36D6ED83E0AE b323
 
 	// Returns:
 	//
@@ -8538,7 +8537,7 @@ namespace INTERIOR
 	// Seems to do the exact same as INTERIOR::GET_ROOM_KEY_FROM_ENTITY
 	static Hash GET_KEY_FOR_ENTITY_IN_ROOM(GameEntity entity) { return invoke<Hash>(0x399685DB942336BC, entity); } // 0x399685DB942336BC 0x91EA80EF b323
 
-	static vector3 GET_OFFSET_FROM_INTERIOR_IN_WORLD_COORDS(int interiorID, float x, float y, float z) { return invoke<Vector3>(0x9E3B3E6D66F6E22F, interiorID, x, y, z); } // 0x9E3B3E6D66F6E22F 0x7D8F26A1 b323
+	static Vector3 GET_OFFSET_FROM_INTERIOR_IN_WORLD_COORDS(int interiorID, float x, float y, float z) { return invoke<Vector3>(0x9E3B3E6D66F6E22F, interiorID, x, y, z); } // 0x9E3B3E6D66F6E22F 0x7D8F26A1 b323
 
 	// Returns the room hash key from the current gameplay cam.
 	static Hash _GET_ROOM_KEY_FROM_GAMEPLAY_CAM() { return invoke<Hash>(0xA6575914D2A0B450); } // 0xA6575914D2A0B450 0x4FF3D3F5 b323
@@ -8596,7 +8595,7 @@ namespace ITEMSET
 
 	static void CLEAN_ITEMSET(Any p0) { invoke<Void>(0x41BC0D722FC04221, p0); } // 0x41BC0D722FC04221 0x919A4858 b323
 
-	static Any CREATE_ITEMSET(vector3* distri) { return invoke<Any>(0x35AD299F50D91B24, distri); } // 0x35AD299F50D91B24 0x0A113B2C b323
+	static Any CREATE_ITEMSET(Vector3* distri) { return invoke<Any>(0x35AD299F50D91B24, distri); } // 0x35AD299F50D91B24 0x0A113B2C b323
 
 	static void DESTROY_ITEMSET(Any p0) { invoke<Void>(0xDE18220B1C183EDA, p0); } // 0xDE18220B1C183EDA 0x83CE1A4C b323
 
@@ -8959,7 +8958,7 @@ namespace GAMEPLAY
 	// checkpoints where X1, Y1, Z1 is your/a position and
 	// X2, Y2, Z2 is a given position ahead of that position?
 	// =======================================================
-	static bool FIND_SPAWN_POINT_IN_DIRECTION(float x1, float y1, float z1, float x2, float y2, float z2, float distance, vector3* spawnPoint) { return invoke<bool>(0x6874E2190B0C1972, x1, y1, z1, x2, y2, z2, distance, spawnPoint); } // 0x6874E2190B0C1972 0x71AEFD77 b323
+	static bool FIND_SPAWN_POINT_IN_DIRECTION(float x1, float y1, float z1, float x2, float y2, float z2, float distance, Vector3* spawnPoint) { return invoke<bool>(0x6874E2190B0C1972, x1, y1, z1, x2, y2, z2, distance, spawnPoint); } // 0x6874E2190B0C1972 0x71AEFD77 b323
 
 	// Sets the localplayer playerinfo state back to playing (State 0)
 	//
@@ -8994,7 +8993,7 @@ namespace GAMEPLAY
 
 	static Any _0xD10282B6E3751BA0() { return invoke<Any>(0xD10282B6E3751BA0); } // 0xD10282B6E3751BA0 b323
 
-	static vector3 _0x21C235BC64831E5A(float p0, float p1, float p2, float p3, float p4, float p5, float p6, float p7, float p8, bool p9) { return invoke<Vector3>(0x21C235BC64831E5A, p0, p1, p2, p3, p4, p5, p6, p7, p8, p9); } // 0x21C235BC64831E5A 0xCAECF37E b323
+	static Vector3 _0x21C235BC64831E5A(float p0, float p1, float p2, float p3, float p4, float p5, float p6, float p7, float p8, bool p9) { return invoke<Vector3>(0x21C235BC64831E5A, p0, p1, p2, p3, p4, p5, p6, p7, p8, p9); } // 0x21C235BC64831E5A 0xCAECF37E b323
 
 	static float _GET_CLOUD_HAT_OPACITY() { return invoke<float>(0x20AC25E781AE4A84); } // 0x20AC25E781AE4A84 b323
 
@@ -9031,13 +9030,13 @@ namespace GAMEPLAY
 	// {
 	//   return vParam0.y * vParam1.z - vParam0.z * vParam1.y, vParam0.z * vParam1.x - vParam0.x * vParam1.z, vParam0.x * vParam1.y - vParam0.y * vParam1.x;
 	// }
-	// float func_67(vector3 vParam0, vector3 vParam1)
+	// float func_67(Vector3 vParam0, Vector3 vParam1)
 	// {
 	//     return vParam0.x * vParam1.x + vParam0.y * vParam1.y + vParam0.z * vParam1.z;
 	// }
 	// float p3; Vector3 p4;
 	// _GET_GROUND_COORDS_WHILE_IN_AIR(coords0to.x, coords0to.y, coords0to.z, &p3, &p4);
-	static bool _GET_GROUND_COORDS_WHILE_IN_AIR(float x, float y, float z, float* p3, vector3* p4) { return invoke<bool>(0x8BDC7BFC57A81E76, x, y, z, p3, p4); } // 0x8BDC7BFC57A81E76 0x64D91CED b323
+	static bool _GET_GROUND_COORDS_WHILE_IN_AIR(float x, float y, float z, float* p3, Vector3* p4) { return invoke<bool>(0x8BDC7BFC57A81E76, x, y, z, p3, p4); } // 0x8BDC7BFC57A81E76 0x64D91CED b323
 
 	static Any _0x9E82F0F362881B29(Any p0, Any p1, Any p2, Any p3, Any p4) { return invoke<Any>(0x9E82F0F362881B29, p0, p1, p2, p3, p4); } // 0x9E82F0F362881B29 b505
 
@@ -9072,7 +9071,7 @@ namespace GAMEPLAY
 	// Calculate (maximum - minimum) to get the size, in which case, Y will be how long the model is.
 	//
 	// Example from the scripts: GAMEPLAY::GET_MODEL_DIMENSIONS(ENTITY::GET_ENTITY_MODEL(PLAYER::PLAYER_PED_ID()), &v_1A, &v_17);
-	static void GET_MODEL_DIMENSIONS(Hash modelHash, vector3* minimum, vector3* maximum) { invoke<Void>(0x03E8D3D5F549087A, modelHash, minimum, maximum); } // 0x03E8D3D5F549087A 0x91ABB8E0 b323
+	static void GET_MODEL_DIMENSIONS(Hash modelHash, Vector3* minimum, Vector3* maximum) { invoke<Void>(0x03E8D3D5F549087A, modelHash, minimum, maximum); } // 0x03E8D3D5F549087A 0x91ABB8E0 b323
 
 	// Returns weather name hash
 	static Hash GET_NEXT_WEATHER_TYPE_HASH_NAME() { return invoke<Hash>(0x711327CD09C8F162); } // 0x711327CD09C8F162 0x353E8056 b323
@@ -9139,7 +9138,7 @@ namespace GAMEPLAY
 
 	static Any _0x6856EC3D35C81EA4() { return invoke<Any>(0x6856EC3D35C81EA4); } // 0x6856EC3D35C81EA4 b323
 
-	static vector3 GET_WIND_DIRECTION() { return invoke<Vector3>(0x1F400FEF721170DA); } // 0x1F400FEF721170DA 0x89499A0D b323
+	static Vector3 GET_WIND_DIRECTION() { return invoke<Vector3>(0x1F400FEF721170DA); } // 0x1F400FEF721170DA 0x89499A0D b323
 
 	static float GET_WIND_SPEED() { return invoke<float>(0xA8CF1CC0AFCD3F12); } // 0xA8CF1CC0AFCD3F12 0x098F0F3C b323
 
@@ -10315,11 +10314,11 @@ namespace MOBILE
 	// Destroys the currently active mobile phone.
 	static void DESTROY_MOBILE_PHONE() { invoke<Void>(0x3BC861DF703E5097); } // 0x3BC861DF703E5097 0x1A65037B b323
 
-	static void GET_MOBILE_PHONE_POSITION(vector3* position) { invoke<Void>(0x584FDFDA48805B86, position); } // 0x584FDFDA48805B86 0xB2E1E1A0 b323
+	static void GET_MOBILE_PHONE_POSITION(Vector3* position) { invoke<Void>(0x584FDFDA48805B86, position); } // 0x584FDFDA48805B86 0xB2E1E1A0 b323
 
 	static void GET_MOBILE_PHONE_RENDER_ID(int* renderId) { invoke<Void>(0xB4A53E05F68B6FA1, renderId); } // 0xB4A53E05F68B6FA1 0x88E4FECE b323
 
-	static void GET_MOBILE_PHONE_ROTATION(vector3* rotation, Any p1) { invoke<Void>(0x1CEFB61F193070AE, rotation, p1); } // 0x1CEFB61F193070AE 0x17A29F23 b323
+	static void GET_MOBILE_PHONE_ROTATION(Vector3* rotation, Any p1) { invoke<Void>(0x1CEFB61F193070AE, rotation, p1); } // 0x1CEFB61F193070AE 0x17A29F23 b323
 
 	// If bool Toggle = true so the mobile is hide to screen.
 	// If bool Toggle = false so the mobile is show to screen.
@@ -11265,11 +11264,11 @@ namespace NETWORK
 
 	static Any _0x2DA41ED6E1FCD7A5(Any p0, Any p1) { return invoke<Any>(0x2DA41ED6E1FCD7A5, p0, p1); } // 0x2DA41ED6E1FCD7A5 b463
 
-	static vector3 _0x64D779659BC37B19(Any p0) { return invoke<Vector3>(0x64D779659BC37B19, p0); } // 0x64D779659BC37B19 b393
+	static Vector3 _0x64D779659BC37B19(Any p0) { return invoke<Vector3>(0x64D779659BC37B19, p0); } // 0x64D779659BC37B19 b393
 
-	static vector3 _0x125E6D638B8605D4(Any p0) { return invoke<Vector3>(0x125E6D638B8605D4, p0); } // 0x125E6D638B8605D4 b393
+	static Vector3 _0x125E6D638B8605D4(Any p0) { return invoke<Vector3>(0x125E6D638B8605D4, p0); } // 0x125E6D638B8605D4 b393
 
-	static vector3 _0x33DE49EDF4DDE77A(Any p0) { return invoke<Vector3>(0x33DE49EDF4DDE77A, p0); } // 0x33DE49EDF4DDE77A b1103
+	static Vector3 _0x33DE49EDF4DDE77A(Any p0) { return invoke<Vector3>(0x33DE49EDF4DDE77A, p0); } // 0x33DE49EDF4DDE77A b1103
 
 	// Retrieves the local player's NetworkHandle* and stores it in the given buffer.
 	//
@@ -11369,7 +11368,7 @@ namespace NETWORK
 	static int _NETWORK_GET_RANDOM_INT_IN_RANGE(int rangeStart, int rangeEnd) { return invoke<int>(0xE30CF56F1EFA5F43, rangeStart, rangeEnd); } // 0xE30CF56F1EFA5F43 0xF9B6426D b323
 
 	// Based on scripts such as in freemode.c how they call their vars vVar and fVar the 2nd and 3rd param it a Vector3 and Float, but the first is based on get_random_int_in_range..
-	static void NETWORK_GET_RESPAWN_RESULT(int randomInt, vector3* coordinates, float* heading) { invoke<Void>(0x371EA43692861CF1, randomInt, coordinates, heading); } // 0x371EA43692861CF1 0xDDFE9FBC b323
+	static void NETWORK_GET_RESPAWN_RESULT(int randomInt, Vector3* coordinates, float* heading) { invoke<Void>(0x371EA43692861CF1, randomInt, coordinates, heading); } // 0x371EA43692861CF1 0xDDFE9FBC b323
 
 	static Any _0x6C34F1208B8923FD(Any p0) { return invoke<Any>(0x6C34F1208B8923FD, p0); } // 0x6C34F1208B8923FD 0x03287FD2 b323
 
@@ -12749,7 +12748,7 @@ namespace OBJECT
 
 	// only documented params
 	// dont know what this does.... To Be Continued...
-	static Any _0x163F8B586BC95F2A(Any coords, float radius, Hash modelHash, float x, float y, float z, vector3* p6, int p7) { return invoke<Any>(0x163F8B586BC95F2A, coords, radius, modelHash, x, y, z, p6, p7); } // 0x163F8B586BC95F2A 0x65213FC3 b323
+	static Any _0x163F8B586BC95F2A(Any coords, float radius, Hash modelHash, float x, float y, float z, Vector3* p6, int p7) { return invoke<Any>(0x163F8B586BC95F2A, coords, radius, modelHash, x, y, z, p6, p7); } // 0x163F8B586BC95F2A 0x65213FC3 b323
 
 	static Any _0xDB41D07A45A6D4B7(Any p0) { return invoke<Any>(0xDB41D07A45A6D4B7, p0); } // 0xDB41D07A45A6D4B7 0x000E92DC b323
 
@@ -12759,9 +12758,9 @@ namespace OBJECT
 
 	static Any _0xE84EB93729C5F36A(Any p0) { return invoke<Any>(0xE84EB93729C5F36A, p0); } // 0xE84EB93729C5F36A b757
 
-	static vector3 _GET_OBJECT_OFFSET_FROM_COORDS(float xPos, float yPos, float zPos, float heading, float xOffset, float yOffset, float zOffset) { return invoke<Vector3>(0x163E252DE035A133, xPos, yPos, zPos, heading, xOffset, yOffset, zOffset); } // 0x163E252DE035A133 0x87A42A12 b323
+	static Vector3 _GET_OBJECT_OFFSET_FROM_COORDS(float xPos, float yPos, float zPos, float heading, float xOffset, float yOffset, float zOffset) { return invoke<Vector3>(0x163E252DE035A133, xPos, yPos, zPos, heading, xOffset, yOffset, zOffset); } // 0x163E252DE035A133 0x87A42A12 b323
 
-	static vector3 GET_PICKUP_COORDS(Pickup pickup) { return invoke<Vector3>(0x225B8B35C88029B3, pickup); } // 0x225B8B35C88029B3 0xC2E1E2C5 b323
+	static Vector3 GET_PICKUP_COORDS(Pickup pickup) { return invoke<Vector3>(0x225B8B35C88029B3, pickup); } // 0x225B8B35C88029B3 0xC2E1E2C5 b323
 
 	static Any _0xB3ECA65C7317F174() { return invoke<Any>(0xB3ECA65C7317F174); } // 0xB3ECA65C7317F174 b944
 
@@ -12777,7 +12776,7 @@ namespace OBJECT
 
 	static float _0x260EE4FDBDF4DB01(Any p0) { return invoke<float>(0x260EE4FDBDF4DB01, p0); } // 0x260EE4FDBDF4DB01 0x020497DE b323
 
-	static vector3 GET_SAFE_PICKUP_COORDS(float x, float y, float z, Any p3, Any p4) { return invoke<Vector3>(0x6E16BC2503FF1FF0, x, y, z, p3, p4); } // 0x6E16BC2503FF1FF0 0x618B5F67 b323
+	static Vector3 GET_SAFE_PICKUP_COORDS(float x, float y, float z, Any p3, Any p4) { return invoke<Vector3>(0x6E16BC2503FF1FF0, x, y, z, p3, p4); } // 0x6E16BC2503FF1FF0 0x618B5F67 b323
 
 	// locked is 0 if no door is found
 	// locked is 0 if door is unlocked
@@ -13380,10 +13379,10 @@ namespace PATHFIND
 	static float _0x29C24BFBED8AB8FB(float p0, float p1) { return invoke<float>(0x29C24BFBED8AB8FB, p0, p1); } // 0x29C24BFBED8AB8FB 0x3FE8C5A0 b323
 
 	// Get the closest vehicle node to a given position, unknown1 = 3.0, unknown2 = 0
-	static bool GET_CLOSEST_MAJOR_VEHICLE_NODE(float x, float y, float z, vector3* outPosition, float unknown1, int unknown2) { return invoke<bool>(0x2EABE3B06F58C1BE, x, y, z, outPosition, unknown1, unknown2); } // 0x2EABE3B06F58C1BE 0x04B5F15B b323
+	static bool GET_CLOSEST_MAJOR_VEHICLE_NODE(float x, float y, float z, Vector3* outPosition, float unknown1, int unknown2) { return invoke<bool>(0x2EABE3B06F58C1BE, x, y, z, outPosition, unknown1, unknown2); } // 0x2EABE3B06F58C1BE 0x04B5F15B b323
 
 	// p1 seems to be always 1.0f in the scripts
-	static Any GET_CLOSEST_ROAD(float x, float y, float z, float p3, int p4, vector3* p5, vector3* p6, Any* p7, Any* p8, float* p9, bool p10) { return invoke<Any>(0x132F52BBA570FE92, x, y, z, p3, p4, p5, p6, p7, p8, p9, p10); } // 0x132F52BBA570FE92 0x567B0E11 b323
+	static Any GET_CLOSEST_ROAD(float x, float y, float z, float p3, int p4, Vector3* p5, Vector3* p6, Any* p7, Any* p8, float* p9, bool p10) { return invoke<Any>(0x132F52BBA570FE92, x, y, z, p3, p4, p5, p6, p7, p8, p9, p10); } // 0x132F52BBA570FE92 0x567B0E11 b323
 
 	// FYI: When falling through the map (or however you got under it) you will respawn when your player ped's height is <= -200.0 meters (I think you all know this) and when in a vehicle you will actually respawn at the closest vehicle node.
 	//
@@ -13405,7 +13404,7 @@ namespace PATHFIND
 	// Same with only asphalt road (0, 4, 8, etc) and simple path/asphalt road (1, 5, 9, etc).
 	//
 	// gtaforums.com/topic/843561-pathfind-node-types
-	static bool GET_CLOSEST_VEHICLE_NODE(float x, float y, float z, vector3* outPosition, int nodeType, float p5, float p6) { return invoke<bool>(0x240A18690AE96513, x, y, z, outPosition, nodeType, p5, p6); } // 0x240A18690AE96513 0x6F5F1E6C b323
+	static bool GET_CLOSEST_VEHICLE_NODE(float x, float y, float z, Vector3* outPosition, int nodeType, float p5, float p6) { return invoke<bool>(0x240A18690AE96513, x, y, z, outPosition, nodeType, p5, p6); } // 0x240A18690AE96513 0x6F5F1E6C b323
 
 	// p5, p6 and p7 seems to be about the same as p4, p5 and p6 for GET_CLOSEST_VEHICLE_NODE. p6 and/or p7 has something to do with finding a node on the same path/road and same direction(at least for this native, something to do with the heading maybe). Edit this when you find out more.
 	//
@@ -13432,7 +13431,7 @@ namespace PATHFIND
 	//
 	// ------------------------------------------------------------------
 	// C# Example (ins1de) : pastebin.com/fxtMWAHD
-	static bool GET_CLOSEST_VEHICLE_NODE_WITH_HEADING(float x, float y, float z, vector3* outPosition, float* outHeading, int nodeType, float p6, int p7) { return invoke<bool>(0xFF071FB798B803B0, x, y, z, outPosition, outHeading, nodeType, p6, p7); } // 0xFF071FB798B803B0 0x8BD5759B b323
+	static bool GET_CLOSEST_VEHICLE_NODE_WITH_HEADING(float x, float y, float z, Vector3* outPosition, float* outHeading, int nodeType, float p6, int p7) { return invoke<bool>(0xFF071FB798B803B0, x, y, z, outPosition, outHeading, nodeType, p6, p7); } // 0xFF071FB798B803B0 0x8BD5759B b323
 
 	static Any _0x869DAACBBE9FA006() { return invoke<Any>(0x869DAACBBE9FA006); } // 0x869DAACBBE9FA006 0x286F82CC b323
 
@@ -13440,21 +13439,21 @@ namespace PATHFIND
 
 	static Any _0xD3A6A0EF48823A8C() { return invoke<Any>(0xD3A6A0EF48823A8C); } // 0xD3A6A0EF48823A8C b323
 
-	static bool GET_NTH_CLOSEST_VEHICLE_NODE(float x, float y, float z, int nthClosest, vector3* outPosition, Any unknown1, Any unknown2, Any unknown3) { return invoke<bool>(0xE50E52416CCF948B, x, y, z, nthClosest, outPosition, unknown1, unknown2, unknown3); } // 0xE50E52416CCF948B 0xF125BFCC b323
+	static bool GET_NTH_CLOSEST_VEHICLE_NODE(float x, float y, float z, int nthClosest, Vector3* outPosition, Any unknown1, Any unknown2, Any unknown3) { return invoke<bool>(0xE50E52416CCF948B, x, y, z, nthClosest, outPosition, unknown1, unknown2, unknown3); } // 0xE50E52416CCF948B 0xF125BFCC b323
 
 	// See gtaforums.com/topic/843561-pathfind-node-types for node type info. 0 = paved road only, 1 = any road, 3 = water
 	//
 	// p10 always equal 0x40400000
 	// p11 always equal 0
-	static bool GET_NTH_CLOSEST_VEHICLE_NODE_FAVOUR_DIRECTION(float x, float y, float z, float desiredX, float desiredY, float desiredZ, int nthClosest, vector3* outPosition, float* outHeading, int nodetype, Any p10, Any p11) { return invoke<bool>(0x45905BE8654AE067, x, y, z, desiredX, desiredY, desiredZ, nthClosest, outPosition, outHeading, nodetype, p10, p11); } // 0x45905BE8654AE067 0x928A4DEC b323
+	static bool GET_NTH_CLOSEST_VEHICLE_NODE_FAVOUR_DIRECTION(float x, float y, float z, float desiredX, float desiredY, float desiredZ, int nthClosest, Vector3* outPosition, float* outHeading, int nodetype, Any p10, Any p11) { return invoke<bool>(0x45905BE8654AE067, x, y, z, desiredX, desiredY, desiredZ, nthClosest, outPosition, outHeading, nodetype, p10, p11); } // 0x45905BE8654AE067 0x928A4DEC b323
 
 	// Returns the id.
 	static int GET_NTH_CLOSEST_VEHICLE_NODE_ID(float x, float y, float z, int nth, int nodetype, float p5, float p6) { return invoke<int>(0x22D7275A79FE8215, x, y, z, nth, nodetype, p5, p6); } // 0x22D7275A79FE8215 0x3F358BEA b323
 
-	static Any GET_NTH_CLOSEST_VEHICLE_NODE_ID_WITH_HEADING(float x, float y, float z, int nthClosest, vector3* outPosition, float outHeading, Any p6, float p7, float p8) { return invoke<Any>(0x6448050E9C2A7207, x, y, z, nthClosest, outPosition, outHeading, p6, p7, p8); } // 0x6448050E9C2A7207 0xC1AEB88D b323
+	static Any GET_NTH_CLOSEST_VEHICLE_NODE_ID_WITH_HEADING(float x, float y, float z, int nthClosest, Vector3* outPosition, float outHeading, Any p6, float p7, float p8) { return invoke<Any>(0x6448050E9C2A7207, x, y, z, nthClosest, outPosition, outHeading, p6, p7, p8); } // 0x6448050E9C2A7207 0xC1AEB88D b323
 
 	// Get the nth closest vehicle node and its heading. (unknown2 = 9, unknown3 = 3.0, unknown4 = 2.5)
-	static bool GET_NTH_CLOSEST_VEHICLE_NODE_WITH_HEADING(float x, float y, float z, int nthClosest, vector3* outPosition, float* heading, Any* unknown1, int unknown2, float unknown3, float unknown4) { return invoke<bool>(0x80CA6A8B6C094CC4, x, y, z, nthClosest, outPosition, heading, unknown1, unknown2, unknown3, unknown4); } // 0x80CA6A8B6C094CC4 0x7349C856 b323
+	static bool GET_NTH_CLOSEST_VEHICLE_NODE_WITH_HEADING(float x, float y, float z, int nthClosest, Vector3* outPosition, float* heading, Any* unknown1, int unknown2, float unknown3, float unknown4) { return invoke<bool>(0x80CA6A8B6C094CC4, x, y, z, nthClosest, outPosition, heading, unknown1, unknown2, unknown3, unknown4); } // 0x80CA6A8B6C094CC4 0x7349C856 b323
 
 	static Any _0x01708E8DD3FF8C65(float p0, float p1, float p2, float p3, float p4, float p5) { return invoke<Any>(0x01708E8DD3FF8C65, p0, p1, p2, p3, p4, p5); } // 0x01708E8DD3FF8C65 b323
 
@@ -13462,7 +13461,7 @@ namespace PATHFIND
 
 	static Any _0xF3162836C28F9DA5(Any p0, Any p1, Any p2, Any p3) { return invoke<Any>(0xF3162836C28F9DA5, p0, p1, p2, p3); } // 0xF3162836C28F9DA5 b505
 
-	static bool GET_RANDOM_VEHICLE_NODE(float x, float y, float z, float radius, bool p4, bool p5, bool p6, vector3* outPosition, int* nodeId) { return invoke<bool>(0x93E0DB8440B73A7D, x, y, z, radius, p4, p5, p6, outPosition, nodeId); } // 0x93E0DB8440B73A7D 0xAD1476EA b323
+	static bool GET_RANDOM_VEHICLE_NODE(float x, float y, float z, float radius, bool p4, bool p5, bool p6, Vector3* outPosition, int* nodeId) { return invoke<bool>(0x93E0DB8440B73A7D, x, y, z, radius, p4, p5, p6, outPosition, nodeId); } // 0x93E0DB8440B73A7D 0xAD1476EA b323
 
 	static Any _0xA0F8A7517A273C05(Any p0, Any p1, Any p2, Any p3, Any p4) { return invoke<Any>(0xA0F8A7517A273C05, p0, p1, p2, p3, p4); } // 0xA0F8A7517A273C05 b463
 
@@ -13473,7 +13472,7 @@ namespace PATHFIND
 	// In the scripts these flags are used: 0, 14, 12, 16, 20, 21, 28. 0 is most commonly used, then 16.
 	//
 	// 16 works for me, 0 crashed the script.
-	static bool GET_SAFE_COORD_FOR_PED(float x, float y, float z, bool onGround, vector3* outPosition, int flags) { return invoke<bool>(0xB61C8E878A4199CA, x, y, z, onGround, outPosition, flags); } // 0xB61C8E878A4199CA 0xB370270A b323
+	static bool GET_SAFE_COORD_FOR_PED(float x, float y, float z, bool onGround, Vector3* outPosition, int flags) { return invoke<bool>(0xB61C8E878A4199CA, x, y, z, onGround, outPosition, flags); } // 0xB61C8E878A4199CA 0xB370270A b323
 
 	// Determines the name of the street which is the closest to the given coordinates.
 	//
@@ -13535,7 +13534,7 @@ namespace PATHFIND
 	// WEAPON::GET_PED_LAST_WEAPON_IMPACT_COORD
 	// WORLDPROBE::_0xFF6BE494C7987F34
 	// WORLDPROBE::_GET_RAYCAST_RESULT
-	static void GET_VEHICLE_NODE_POSITION(int nodeId, vector3* outPosition) { invoke<Void>(0x703123E5E7D429C2, nodeId, outPosition); } // 0x703123E5E7D429C2 0xE38E252D b323
+	static void GET_VEHICLE_NODE_POSITION(int nodeId, Vector3* outPosition) { invoke<Void>(0x703123E5E7D429C2, nodeId, outPosition); } // 0x703123E5E7D429C2 0xE38E252D b323
 
 	// MulleDK19: Gets the density and flags of the closest node to the specified position.
 	// Density is a value between 0 and 15, indicating how busy the road is.
@@ -13934,9 +13933,9 @@ namespace PED
 
 	static void _0xD33DAA36272177C4(GamePed ped) { invoke<Void>(0xD33DAA36272177C4, ped); } // 0xD33DAA36272177C4 0xA89A53F2 b323
 
-	static vector3 GET_ANIM_INITIAL_OFFSET_POSITION(const char* animDict, const char* animName, float x, float y, float z, float xRot, float yRot, float zRot, float p8, int p9) { return invoke<Vector3>(0xBE22B26DD764C040, animDict, animName, x, y, z, xRot, yRot, zRot, p8, p9); } // 0xBE22B26DD764C040 0xC59D4268 b323
+	static Vector3 GET_ANIM_INITIAL_OFFSET_POSITION(const char* animDict, const char* animName, float x, float y, float z, float xRot, float yRot, float zRot, float p8, int p9) { return invoke<Vector3>(0xBE22B26DD764C040, animDict, animName, x, y, z, xRot, yRot, zRot, p8, p9); } // 0xBE22B26DD764C040 0xC59D4268 b323
 
-	static vector3 GET_ANIM_INITIAL_OFFSET_ROTATION(const char* animDict, const char* animName, float x, float y, float z, float xRot, float yRot, float zRot, float p8, int p9) { return invoke<Vector3>(0x4B805E6046EE9E47, animDict, animName, x, y, z, xRot, yRot, zRot, p8, p9); } // 0x4B805E6046EE9E47 0x5F7789E6 b323
+	static Vector3 GET_ANIM_INITIAL_OFFSET_ROTATION(const char* animDict, const char* animName, float x, float y, float z, float xRot, float yRot, float zRot, float p8, int p9) { return invoke<Vector3>(0x4B805E6046EE9E47, animDict, animName, x, y, z, xRot, yRot, zRot, p8, p9); } // 0x4B805E6046EE9E47 0x5F7789E6 b323
 
 	static bool _0x03EA03AF85A85CB7(GamePed ped, bool p1, bool p2, bool p3, bool p4, bool p5, bool p6, bool p7, Any p8) { return invoke<bool>(0x03EA03AF85A85CB7, ped, p1, p2, p3, p4, p5, p6, p7, p8); } // 0x03EA03AF85A85CB7 0x18DD76A1 b323
 
@@ -14008,7 +14007,7 @@ namespace PED
 	// 16=OptimalCoverDistance
 	static float GET_COMBAT_FLOAT(GamePed ped, int p1) { return invoke<float>(0x52DFF8A10508090A, ped, p1); } // 0x52DFF8A10508090A 0x511D7EF8 b323
 
-	static vector3 GET_DEAD_PED_PICKUP_COORDS(GamePed ped, float p1, float p2) { return invoke<Vector3>(0xCD5003B097200F36, ped, p1, p2); } // 0xCD5003B097200F36 0x129F9DC1 b323
+	static Vector3 GET_DEAD_PED_PICKUP_COORDS(GamePed ped, float p1, float p2) { return invoke<Vector3>(0xCD5003B097200F36, ped, p1, p2); } // 0xCD5003B097200F36 0x129F9DC1 b323
 
 	static Any _0xAAA6A3698A69E048(Any p0) { return invoke<Any>(0xAAA6A3698A69E048, p0); } // 0xAAA6A3698A69E048 b323
 
@@ -14113,7 +14112,7 @@ namespace PED
 	// offsetX: The X-component of the offset to add to the position relative to the bone's rotation.
 	// offsetY: The Y-component of the offset to add to the position relative to the bone's rotation.
 	// offsetZ: The Z-component of the offset to add to the position relative to the bone's rotation.
-	static vector3 GET_PED_BONE_COORDS(GamePed ped, int boneId, float offsetX, float offsetY, float offsetZ) { return invoke<Vector3>(0x17C07FC640E86B4E, ped, boneId, offsetX, offsetY, offsetZ); } // 0x17C07FC640E86B4E 0x4579CAB1 b323
+	static Vector3 GET_PED_BONE_COORDS(GamePed ped, int boneId, float offsetX, float offsetY, float offsetZ) { return invoke<Vector3>(0x17C07FC640E86B4E, ped, boneId, offsetX, offsetY, offsetZ); } // 0x17C07FC640E86B4E 0x4579CAB1 b323
 
 	// no bone= -1
 	//
@@ -14249,7 +14248,7 @@ namespace PED
 	// };
 	static int _GET_TATTOO_ZONE(Hash collection, Hash overlay) { return invoke<int>(0x9FD452BFBE7A7A8B, collection, overlay); } // 0x9FD452BFBE7A7A8B 0x3543019E b323
 
-	static vector3 GET_PED_DEFENSIVE_AREA_POSITION(GamePed ped, bool p1) { return invoke<Vector3>(0x3C06B8786DD94CD1, ped, p1); } // 0x3C06B8786DD94CD1 0xCB65198D b323
+	static Vector3 GET_PED_DEFENSIVE_AREA_POSITION(GamePed ped, bool p1) { return invoke<Vector3>(0x3C06B8786DD94CD1, ped, p1); } // 0x3C06B8786DD94CD1 0xCB65198D b323
 
 	// Ids
 	// 0 - Head
@@ -14275,7 +14274,7 @@ namespace PED
 	// If worldSpace is false, the returned offset is relative to the ped. That is, if the ped has moved 1 meter right and 5 meters forward, it'll return 1,5,0.
 	//
 	// If worldSpace is true, the returned offset is relative to the world. That is, if the ped has moved 1 meter on the X axis and 5 meters on the Y axis, it'll return 1,5,0.
-	static vector3 GET_PED_EXTRACTED_DISPLACEMENT(GamePed ped, bool worldSpace) { return invoke<Vector3>(0xE0AF41401ADF87E3, ped, worldSpace); } // 0xE0AF41401ADF87E3 0x5231F901 b323
+	static Vector3 GET_PED_EXTRACTED_DISPLACEMENT(GamePed ped, bool worldSpace) { return invoke<Vector3>(0xE0AF41401ADF87E3, ped, worldSpace); } // 0xE0AF41401ADF87E3 0x5231F901 b323
 
 	// Returns the group id of which the specified ped is a member of.
 	static int GET_PED_GROUP_INDEX(GamePed ped) { return invoke<int>(0xF162E133B4E7A675, ped); } // 0xF162E133B4E7A675 0x134E0785 b323
@@ -16086,13 +16085,13 @@ namespace PHYSICS
 
 	static bool _0x271C9D3ACA5D6409(Object rope) { return invoke<bool>(0x271C9D3ACA5D6409, rope); } // 0x271C9D3ACA5D6409 b323
 
-	static vector3 GET_CGOFFSET(Object rope) { return invoke<Vector3>(0x8214A4B5A7A33612, rope); } // 0x8214A4B5A7A33612 0x49A11F0D b323
+	static Vector3 GET_CGOFFSET(Object rope) { return invoke<Vector3>(0x8214A4B5A7A33612, rope); } // 0x8214A4B5A7A33612 0x49A11F0D b323
 
 	static Any _0x0C112765300C7E1E(Any p0) { return invoke<Any>(0x0C112765300C7E1E, p0); } // 0x0C112765300C7E1E b505
 
-	static vector3 GET_ROPE_LAST_VERTEX_COORD(Object rope) { return invoke<Vector3>(0x21BB0FBD3E217C2D, rope); } // 0x21BB0FBD3E217C2D 0x91F6848B b323
+	static Vector3 GET_ROPE_LAST_VERTEX_COORD(Object rope) { return invoke<Vector3>(0x21BB0FBD3E217C2D, rope); } // 0x21BB0FBD3E217C2D 0x91F6848B b323
 
-	static vector3 GET_ROPE_VERTEX_COORD(Object rope, int vertex) { return invoke<Vector3>(0xEA61CA8E80F09E4D, rope, vertex); } // 0xEA61CA8E80F09E4D 0x84374452 b323
+	static Vector3 GET_ROPE_VERTEX_COORD(Object rope, int vertex) { return invoke<Vector3>(0xEA61CA8E80F09E4D, rope, vertex); } // 0xEA61CA8E80F09E4D 0x84374452 b323
 
 	static int GET_ROPE_VERTEX_COUNT(Object rope) { return invoke<int>(0x3655F544CD30F0B5, rope); } // 0x3655F544CD30F0B5 0x5131CD2C b323
 
@@ -16436,7 +16435,7 @@ namespace PLAYER
 
 	static float GET_PLAYER_UNDERWATER_TIME_REMAINING(GamePlayer player) { return invoke<float>(0xA1FCF8E6AF40B731, player); } // 0xA1FCF8E6AF40B731 0x1317125A b323
 
-	static vector3 GET_PLAYER_WANTED_CENTRE_POSITION(GamePlayer player) { return invoke<Vector3>(0x0C92BA89F1AF26F8, player); } // 0x0C92BA89F1AF26F8 0x821F2D2C b323
+	static Vector3 GET_PLAYER_WANTED_CENTRE_POSITION(GamePlayer player) { return invoke<Vector3>(0x0C92BA89F1AF26F8, player); } // 0x0C92BA89F1AF26F8 0x821F2D2C b323
 
 	static int GET_PLAYER_WANTED_LEVEL(GamePlayer player) { return invoke<int>(0xE28E54788CE8F12D, player); } // 0xE28E54788CE8F12D 0xBDCDD163 b323
 
@@ -16966,7 +16965,7 @@ namespace PLAYER
 	// P0: PLAYER::PLAYER_ID()
 	// P1: ENTITY::GET_ENTITY_COORDS(PLAYER::PLAYER_PED_ID(), 1)
 	// P2: Not set by any call
-	static void SET_PLAYER_WANTED_CENTRE_POSITION(GamePlayer player, vector3* position, bool p2, bool p3) { invoke<Void>(0x520E541A97A13354, player, position, p2, p3); } // 0x520E541A97A13354 0xF261633A b323
+	static void SET_PLAYER_WANTED_CENTRE_POSITION(GamePlayer player, Vector3* position, bool p2, bool p3) { invoke<Void>(0x520E541A97A13354, player, position, p2, p3); } // 0x520E541A97A13354 0xF261633A b323
 
 	// Call SET_PLAYER_WANTED_LEVEL_NOW for immediate effect
 	//
@@ -17358,14 +17357,14 @@ namespace SHAPETEST
 	// Vector3 entitySpotCoords = ENTITY::GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(entityHit, offset.x, offset.y, offset.z);
 	//
 	// Use ENTITY::GET_ENTITY_TYPE(entityHit) to quickly distinguish what type of entity you hit (ped/vehicle/object - 1/2/3)
-	static int GET_SHAPE_TEST_RESULT(int rayHandle, bool* hit, vector3* endCoords, vector3* surfaceNormal, GameEntity* entityHit) { return invoke<int>(0x3D87450E15D98694, rayHandle, hit, endCoords, surfaceNormal, entityHit); } // 0x3D87450E15D98694 0xF3C2875A b323
+	static int GET_SHAPE_TEST_RESULT(int rayHandle, bool* hit, Vector3* endCoords, Vector3* surfaceNormal, GameEntity* entityHit) { return invoke<int>(0x3D87450E15D98694, rayHandle, hit, endCoords, surfaceNormal, entityHit); } // 0x3D87450E15D98694 0xF3C2875A b323
 
 	// behaves exactly the same way as GET_SHAPE_TEST_RESULT except it has one extra parameter (_materialHash).
 	//
 	// Quick disassembly seems to indicate that the unknown is a hash. EDIT: Seems to be the hash of the hit material or surface type.
 	//
 	// found a materialFX.dat list of them but not sure if it has to do with this native yet.
-	static int _GET_SHAPE_TEST_RESULT_EX(int rayHandle, bool* hit, vector3* endCoords, vector3* surfaceNormal, Hash* materialHash, GameEntity* entityHit) { return invoke<int>(0x65287525D951F6BE, rayHandle, hit, endCoords, surfaceNormal, materialHash, entityHit); } // 0x65287525D951F6BE 0x4301E10C b323
+	static int _GET_SHAPE_TEST_RESULT_EX(int rayHandle, bool* hit, Vector3* endCoords, Vector3* surfaceNormal, Hash* materialHash, GameEntity* entityHit) { return invoke<int>(0x65287525D951F6BE, rayHandle, hit, endCoords, surfaceNormal, materialHash, entityHit); } // 0x65287525D951F6BE 0x4301E10C b323
 
 	static void _0x2B3334BCA57CD799(GameEntity p0) { invoke<Void>(0x2B3334BCA57CD799, p0); } // 0x2B3334BCA57CD799 0xEC2AAF06 b323
 
@@ -17422,7 +17421,7 @@ namespace SHAPETEST
 	// Actual name starts with START_SHAPE_TEST_??? and it returns a ShapeTest handle that can be used with GET_SHAPE_TEST_RESULT.
 	//
 	// In its only usage in game scripts its called with flag set to 511, entity to player_ped_id and flag2 set to 7
-	static int _0xFF6BE494C7987F34(vector3* pVec1, vector3* pVec2, int flag, GameEntity entity, int flag2) { return invoke<int>(0xFF6BE494C7987F34, pVec1, pVec2, flag, entity, flag2); } // 0xFF6BE494C7987F34 b323
+	static int _0xFF6BE494C7987F34(Vector3* pVec1, Vector3* pVec2, int flag, GameEntity entity, int flag2) { return invoke<int>(0xFF6BE494C7987F34, pVec1, pVec2, flag, entity, flag2); } // 0xFF6BE494C7987F34 b323
 
 	// Performs the same type of trace as START_SHAPE_TEST_CAPSULE, but with some different hardcoded parameters.
 	static int _0xE6AC6C45FBE83004(float x1, float y1, float z1, float x2, float y2, float z2, float radius, int flags, GameEntity entity, Any p9) { return invoke<int>(0xE6AC6C45FBE83004, x1, y1, z1, x2, y2, z2, radius, flags, entity, p9); } // 0xE6AC6C45FBE83004 0x4559460A b323
@@ -18935,14 +18934,14 @@ namespace VEHICLE
 
 	static void _0x99CAD8E7AFDB60FA(Vehicle vehicle, float p1, float p2) { invoke<Void>(0x99CAD8E7AFDB60FA, vehicle, p1, p2); } // 0x99CAD8E7AFDB60FA 0x1128A45B b323
 
-	static bool _0xA4822F1CF23F4810(vector3* outVec, Any p1, vector3* outVec1, Any p3, Any p4, Any p5, Any p6, Any p7, Any p8) { return invoke<bool>(0xA4822F1CF23F4810, outVec, p1, outVec1, p3, p4, p5, p6, p7, p8); } // 0xA4822F1CF23F4810 0x34E02FCD b323
+	static bool _0xA4822F1CF23F4810(Vector3* outVec, Any p1, Vector3* outVec1, Any p3, Any p4, Any p5, Any p6, Any p7, Any p8) { return invoke<bool>(0xA4822F1CF23F4810, outVec, p1, outVec1, p3, p4, p5, p6, p7, p8); } // 0xA4822F1CF23F4810 0x34E02FCD b323
 
 	static int _GET_ALL_VEHICLES(Any* vehArray) { return invoke<int>(0x9B8E1BF04B51F2E8, vehArray); } // 0x9B8E1BF04B51F2E8 b1103
 
 	static Any _0xD0917A423314BBA8(Any p0) { return invoke<Any>(0xD0917A423314BBA8, p0); } // 0xD0917A423314BBA8 b1180
 
 	// Gets the position of the cargobob hook, in world coords.
-	static vector3 _GET_CARGOBOB_HOOK_POSITION(Vehicle cargobob) { return invoke<Vector3>(0xCBDB9B923CACC92D, cargobob); } // 0xCBDB9B923CACC92D b323
+	static Vector3 _GET_CARGOBOB_HOOK_POSITION(Vehicle cargobob) { return invoke<Vector3>(0xCBDB9B923CACC92D, cargobob); } // 0xCBDB9B923CACC92D b323
 
 	// Something related to vehicle lean? (References CVehicleLeanHelper)
 	static float _0x6636C535F6CC2725(Vehicle vehicle) { return invoke<float>(0x6636C535F6CC2725, vehicle); } // 0x6636C535F6CC2725 0x7C8D6464 b323
@@ -19015,7 +19014,7 @@ namespace VEHICLE
 
 	static GameEntity GET_ENTITY_ATTACHED_TO_TOW_TRUCK(Vehicle towTruck) { return invoke<GameEntity>(0xEFEA18DCF10F8F75, towTruck); } // 0xEFEA18DCF10F8F75 0x11EC7844 b323
 
-	static vector3 _GET_ENTRY_POSITION_OF_DOOR(Vehicle vehicle, int doorIndex) { return invoke<Vector3>(0xC0572928C0ABFDA3, vehicle, doorIndex); } // 0xC0572928C0ABFDA3 b944
+	static Vector3 _GET_ENTRY_POSITION_OF_DOOR(Vehicle vehicle, int doorIndex) { return invoke<Vector3>(0xC0572928C0ABFDA3, vehicle, doorIndex); } // 0xC0572928C0ABFDA3 b944
 
 	// Gets the height of the vehicle's suspension.
 	// The higher the value the lower the suspension. Each 0.002 corresponds with one more level lowered.
@@ -19145,9 +19144,9 @@ namespace VEHICLE
 	static float GET_POSITION_IN_RECORDING(Any p0) { return invoke<float>(0x2DACD605FC681475, p0); } // 0x2DACD605FC681475 0x7DCD644C b323
 
 	// p1 is some kind of tolerance
-	static vector3 GET_POSITION_OF_VEHICLE_RECORDING_AT_TIME(int p0, float p1, const char* p2) { return invoke<Vector3>(0xD242728AA6F0FBA2, p0, p1, p2); } // 0xD242728AA6F0FBA2 0x7178558D b323
+	static Vector3 GET_POSITION_OF_VEHICLE_RECORDING_AT_TIME(int p0, float p1, const char* p2) { return invoke<Vector3>(0xD242728AA6F0FBA2, p0, p1, p2); } // 0xD242728AA6F0FBA2 0x7178558D b323
 
-	static vector3 _0x92523B76657A517D(Any p0, float p1) { return invoke<Vector3>(0x92523B76657A517D, p0, p1); } // 0x92523B76657A517D 0xF31973BB b323
+	static Vector3 _0x92523B76657A517D(Any p0, float p1) { return invoke<Vector3>(0x92523B76657A517D, p0, p1); } // 0x92523B76657A517D 0xF31973BB b323
 
 	static Vehicle GET_RANDOM_VEHICLE_BACK_BUMPER_IN_SPHERE(float p0, float p1, float p2, float p3, int p4, int p5, int p6) { return invoke<Vehicle>(0xB50807EABE20A8DC, p0, p1, p2, p3, p4, p5, p6); } // 0xB50807EABE20A8DC 0xD6343F6B b323
 
@@ -19163,9 +19162,9 @@ namespace VEHICLE
 	// flags: The bitwise flags that modifies the behaviour of this function.
 	static Vehicle GET_RANDOM_VEHICLE_IN_SPHERE(float x, float y, float z, float radius, Hash modelHash, int flags) { return invoke<Vehicle>(0x386F6CE5BAF6091C, x, y, z, radius, modelHash, flags); } // 0x386F6CE5BAF6091C 0x57216D03 b323
 
-	static vector3 GET_ROTATION_OF_VEHICLE_RECORDING_AT_TIME(Any p0, float p1, Any* p2) { return invoke<Vector3>(0x2058206FBE79A8AD, p0, p1, p2); } // 0x2058206FBE79A8AD 0xD96DEC68 b323
+	static Vector3 GET_ROTATION_OF_VEHICLE_RECORDING_AT_TIME(Any p0, float p1, Any* p2) { return invoke<Vector3>(0x2058206FBE79A8AD, p0, p1, p2); } // 0x2058206FBE79A8AD 0xD96DEC68 b323
 
-	static vector3 _0xF0F2103EFAF8CBA7(Any p0, float p1) { return invoke<Vector3>(0xF0F2103EFAF8CBA7, p0, p1); } // 0xF0F2103EFAF8CBA7 0x4D1C15C2 b323
+	static Vector3 _0xF0F2103EFAF8CBA7(Any p0, float p1) { return invoke<Vector3>(0xF0F2103EFAF8CBA7, p0, p1); } // 0xF0F2103EFAF8CBA7 0x4D1C15C2 b323
 
 	static float GET_TIME_POSITION_IN_RECORDING(Any p0) { return invoke<float>(0x5746F3A7AB7FE544, p0); } // 0x5746F3A7AB7FE544 0xF8C3E4A2 b323
 
@@ -19277,7 +19276,7 @@ namespace VEHICLE
 	// PC scripts:
 	//
 	// v_5/*{3}*/ = VEHICLE::GET_VEHICLE_DEFORMATION_AT_POS(a_0._f1, 1.21, 6.15, 0.3);
-	static vector3 GET_VEHICLE_DEFORMATION_AT_POS(Vehicle vehicle, float offsetX, float offsetY, float offsetZ) { return invoke<Vector3>(0x4EC6CFBC7B2E9536, vehicle, offsetX, offsetY, offsetZ); } // 0x4EC6CFBC7B2E9536 0xABF02075 b323
+	static Vector3 GET_VEHICLE_DEFORMATION_AT_POS(Vehicle vehicle, float offsetX, float offsetY, float offsetZ) { return invoke<Vector3>(0x4EC6CFBC7B2E9536, vehicle, offsetX, offsetY, offsetZ); } // 0x4EC6CFBC7B2E9536 0xABF02075 b323
 
 	// Dirt level 0..15
 	static float GET_VEHICLE_DIRT_LEVEL(Vehicle vehicle) { return invoke<float>(0x8F17BC8BA08DA62B, vehicle); } // 0x8F17BC8BA08DA62B 0xFD15C065 b323
@@ -19510,7 +19509,7 @@ namespace VEHICLE
 	// Outputs 2 Vector3's.
 	// Scripts check if out2.x - out1.x > someshit.x
 	// Could be suspension related, as in max suspension height and min suspension height, considering the natives location.
-	static void _0xDF7E3EEB29642C38(Vehicle vehicle, vector3* out1, vector3* out2) { invoke<Void>(0xDF7E3EEB29642C38, vehicle, out1, out2); } // 0xDF7E3EEB29642C38 b323
+	static void _0xDF7E3EEB29642C38(Vehicle vehicle, Vector3* out1, Vector3* out2) { invoke<Void>(0xDF7E3EEB29642C38, vehicle, out1, out2); } // 0xDF7E3EEB29642C38 b323
 
 	// Gets the trailer of a vehicle and puts it into the trailer parameter.
 	static bool GET_VEHICLE_TRAILER_VEHICLE(Vehicle vehicle, Vehicle* trailer) { return invoke<bool>(0x1CDD6BADC297830D, vehicle, trailer); } // 0x1CDD6BADC297830D 0xAE84D758 b323
@@ -21131,7 +21130,7 @@ namespace WATER
 
 	static bool TEST_PROBE_AGAINST_ALL_WATER(Any p0, Any p1, Any p2, Any p3, Any p4, Any p5, Any p6, Any p7) { return invoke<bool>(0x8974647ED222EA5F, p0, p1, p2, p3, p4, p5, p6, p7); } // 0x8974647ED222EA5F 0x4A962D55 b323
 
-	static bool TEST_PROBE_AGAINST_WATER(float x1, float y1, float z1, float x2, float y2, float z2, vector3* result) { return invoke<bool>(0xFFA5D878809819DB, x1, y1, z1, x2, y2, z2, result); } // 0xFFA5D878809819DB 0xAA4AE00C b323
+	static bool TEST_PROBE_AGAINST_WATER(float x1, float y1, float z1, float x2, float y2, float z2, Vector3* result) { return invoke<bool>(0xFFA5D878809819DB, x1, y1, z1, x2, y2, z2, result); } // 0xFFA5D878809819DB 0xAA4AE00C b323
 
 	static bool TEST_VERTICAL_PROBE_AGAINST_ALL_WATER(float x, float y, float z, Any p3, Any* p4) { return invoke<bool>(0x2B3451FA1E3142E2, x, y, z, p3, p4); } // 0x2B3451FA1E3142E2 0x4C71D143 b323
 
@@ -21233,7 +21232,7 @@ namespace WEAPON
 	// Pass ped. Pass address of Vector3.
 	// The coord will be put into the Vector3.
 	// The return will determine whether there was a coord found or not.
-	static bool GET_PED_LAST_WEAPON_IMPACT_COORD(GamePed ped, vector3* coords) { return invoke<bool>(0x6C4D0409BA1A2BC2, ped, coords); } // 0x6C4D0409BA1A2BC2 0x9B266079 b323
+	static bool GET_PED_LAST_WEAPON_IMPACT_COORD(GamePed ped, Vector3* coords) { return invoke<bool>(0x6C4D0409BA1A2BC2, ped, coords); } // 0x6C4D0409BA1A2BC2 0x9B266079 b323
 
 	static Hash _GET_PED_AMMO_TYPE_FROM_WEAPON_2(GamePed ped, Hash weaponHash) { return invoke<Hash>(0xF489B44DD5AF4BD9, ped, weaponHash); } // 0xF489B44DD5AF4BD9 b1103
 

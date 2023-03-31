@@ -3,7 +3,7 @@
 namespace CBaseFactoryUtils {
 	std::vector<void*> pointers;
 	void RunHook() {
-		MessageBox(0, "Run hook", "as", MB_OK);
+		//MessageBox(0, "Run hook", "as", MB_OK);
 		for (auto& instance : pointers)
 			reinterpret_cast<CBaseFactoryHelp*>(instance)->Hook();
 	}

@@ -10,5 +10,6 @@
 int main()
 {
     CLauncher launch;
+    //launch.Launch();
     launch.StubSteam();
 }

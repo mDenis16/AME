@@ -23,7 +23,7 @@ void LoadDll(std::string clientDll, DWORD dwProcessId) {
     // Load our DLL
     HANDLE hThread = CreateRemoteThread(Process, nullptr, NULL, LPTHREAD_START_ROUTINE(LoadLibraryA), Memory, NULL, nullptr);
     if (!hThread)  std::cout << "CreateRemoteThread" << std::endl;
-
+    WaitForSingleObject(hThread, INFINITE);
     //Let the program regain control of itself.
     CloseHandle(Process);
 
@@ -72,11 +72,11 @@ CreateProcessW_HK(
 
 
 
-    Sleep(500); //MessageBox(0, "CSteam::CreateProcessHK", str2.data(), MB_OK);
+   // Sleep(500); //MessageBox(0, "CSteam::CreateProcessHK", str2.data(), MB_OK);
 
     if (str.find(L"PlayGTAV") != std::wstring::npos)
     {
-      /// MessageBox(0, "Found PlayGTAV", "", MB_OK);
+     //  MessageBox(0, "Found PlayGTAV", "", MB_OK);
         auto launchPath = CSteam::GetLaunchPath("Software\\AME");
         launchPath.append("\\PlayGTAVStub32.dll");
         
@@ -84,8 +84,8 @@ CreateProcessW_HK(
 
         LoadDll(launchPath, lpProcessInformation->dwProcessId);
     
-        Sleep(500);
-       
+       // MessageBox(0, "Mearsa aici", "EOS", MB_OK);
+       Sleep(200);
         CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)FreeLibraryAndExitThread, CSteam::instance, 0, NULL);
    
        // LoadDll("2", "2", 0);
@@ -242,7 +242,19 @@ void CSteam::Hook() {
     {
         return;
     }
-	
+    //MessageBox(0, "Should start ShellExecuteA ", "Info", MB_OK);
+
+ /*   std::string samp("\"");
+    auto steamPath = samp + GetSteamPath();
+    steamPath.append("\\steam.exe\"");
+    steamPath.append(" ");
+    steamPath.append("steam://rungameid/271590");
+    system(steamPath.c_str());*/
+    ShellExecute(0, "open", "steam://rungameid/271590", NULL, NULL, SW_HIDE);
+    //ShellExecuteA(0, "start", "C:\\Program Files (x86)\\Steam\\steam.exe", "steam://rungameid/271590", 0, SW_HIDE);
+
+   // system("\"C:\\Program Files (x86)\\Steam\\steam.exe\" steam://rungameid/271590");
+
 }
 void CSteam::Unhook() {
 
@@ -266,9 +278,8 @@ void CSteam::Initialize(HMODULE inst)
     instance = inst;
     Hook();
 
-    auto steamPath = GetSteamPath();
-    auto executeCommand = steamPath.append(" steam:://rungameid/271590");
-    ShellExecute(0, 0, executeCommand.c_str(), 0, 0, SW_SHOW);
+    
+
 }
 
 void CSteam::Release()

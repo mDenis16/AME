@@ -2,7 +2,7 @@
 
 #include <d3d11_1.h>
 #include <memory>
-#include <string>
+#include <iostream>
 
 namespace d3d11 {
 

@@ -3,7 +3,23 @@
 #include <MinHook.h>
 #include "nativeList.h"
 #include "CLevelLoader.h"
-#include <string>
+
+#include "Script.h"
+#include "CScrEngine.h"
+class tlsContext
+{
+public:
+	char m_padding1[0xC8];          // 0x00
+	void* m_allocator;   // 0xC8
+	char m_padding2[0x760];         // 0xD0
+	void* m_script_thread;     // 0x830
+	bool m_is_script_thread_active; // 0x838
+
+	static tlsContext* get()
+	{
+		return *reinterpret_cast<tlsContext**>(__readgsqword(0x58));
+	}
+};
 using run_script_threads_t = bool(*)(std::uint32_t ops_to_execute);
 run_script_threads_t run_script_threads_original = nullptr;
 
@@ -19,39 +35,43 @@ __m128 __fastcall RelatedToVehicleDensityCalc() {
 	return (__m128)t;
 }
 
-float parked_density_calc() {
-
-	return 0.f;
+//48 83 EC 28 B1 01 E8 ? ? ? ? 84 C0 74 40 83 C9 FF E8 ? ? ? ? 84 C0 74 34 E8 ? ? ? ? 8B C8 E8 ? ? ? ? 48 8B C8 E8 ? ? ? ? 84 C0 74 1C
+static char*(*g_SC_GET_NICKNAME_2_HK)(__int64 a1);
+const char* __fastcall SC_GET_NICKNAME_2_HK(__int64 a1) {
+	return "Light_Square";
 }
-//85 D2 0F 88 ? ? ? ? B8 ? ? ? ? 75 0E 44 3B C8 0F 85 ? ? ? ? E9 ? ? ? ? 3B D0 75 17 45 85 C9 0F 84 ? ? ? ? 44 3B C8 0F 85 ? ? ? ? E9 ? ? ? ?
-void __fastcall ManageAllWorldGenerators() {
-
-}
-char __fastcall parked_vehicles_generator_loop(__int64 a1, char a2) {
-	return 1;
+void CScriptVM::add_script(std::unique_ptr<script> script)
+{
+	std::lock_guard lock(m_mutex);
+	m_scripts.push_back(std::move(script));
 }
 
+void CScriptVM::remove_all_scripts()
+{
+	std::lock_guard lock(m_mutex);
+	m_scripts.clear();
+}
+//E8 ? ? ? ? 48 85 FF 48 89 1D ? ? ? ? 8B D0 65 48 8B 04 25 ? ? ? ? 48 8B 0C F0 0F 95 C0 41 88 04 0E 8B C2 4A 89 3C 39 EB 02
+__int64 __fastcall CrashesOnEscape(__int64 a1, __int64** a2, DWORD* a3, __int64 a4) {
+	printf("CrashesOnEscape \n");
+	return 0;
+}
 
 void CScriptVM::Hook() {
 	
 //	MessageBox(0, "CScriptVM::Hook", "Try hooking", MB_OK);
-
-	auto RunScriptThreadTarget = hook::get_pattern<void>("45 33 F6 8B E9 85 C9 B8", -0x1F);
-
-
-	char* ScriptVmCaller = hook::pattern(/*"E8 ? ? ? ? E8 ? ? ? ? E8 ? ? ? ? 4C 8D 9C 24 ? ? ? ? 49 8B 5B 40 49 8B 73 48 49 8B E3 "*/"45 33 F6 8B E9 85 C9 B8").count(1).get(0).get<char>(-0x1F);
-	///char* ScriptVMCall = hook::get_call(ScriptVmCaller);
-		//
-	if (MH_CreateHook(ScriptVmCaller, &VMRun, reinterpret_cast<void**>(&run_script_threads_original)) != MH_OK) {
-		std::cout << "Failed hooking run script threads " << std::endl;
-		return;
-	}
-
-
-	if (MH_EnableHook(ScriptVmCaller) != MH_OK)
-		MessageBox(0, "Failed hooking VMScript thread. ", "CScriptVM::Hook", MB_ICONERROR);
 	
-	
+
+
+	//auto SC_GET_NICKNAME_TARGET = hook::pattern("48 83 EC 28 B1 01 E8 ? ? ? ? 84 C0 74 40 83 C9 FF E8 ? ? ? ? 84 C0 74 34 E8 ? ? ? ? 8B C8 E8 ? ? ? ? 48 8B C8 E8 ? ? ? ? 84 C0 74 1C").count(1).get(0).get<void>();
+	//if (MH_CreateHook(SC_GET_NICKNAME_TARGET, &SC_GET_NICKNAME_2_HK, nullptr) != MH_OK) {
+	//	std::cout << "Failed hooking SC_GET_NICKNAME_TARGET " << std::endl;
+	//	return;
+	//}
+
+	//if (MH_EnableHook(SC_GET_NICKNAME_TARGET) != MH_OK)
+	//	MessageBox(0, "Failed hooking SC_GET_NICKNAME_TARGET. ", "CScriptVM::SC_GET_NICKNAME_TARGET", MB_ICONERROR);
+
 
 	//return;
 	//auto target = hook::pattern("48 8B C4 48 89 58 08 57 48 81 EC ? ? ? ? 0F 29 70 E8 0F 29 78 D8 44 0F 29 40 ? 33 DB 8B CB 44 0F 29 48 ? 44 0F 29 50 ? 44 0F 29 58 ? 44 0F 29 60 ? 44 0F 29 6C 24 ? 48 8B 05 ? ? ? ? 48 85 C0 74 04 0F B6 48 06").count(1).get(0).get<void>();
@@ -114,83 +134,43 @@ class cpedfactory {
 public:
 
 };
-bool CScriptVM::VMRun(std::uint32_t ops_to_execute)
+static std::vector<std::uint32_t> lista;
+
+char  __fastcall CScriptVM::VMRun(std::uint32_t ops_to_execute)
 {
 
-	//E8 ? ? ? ? 90 EB 85 CC 48 CC
-	// 
-	
+ 
+	return run_script_threads_original(ops_to_execute);
+}
+static script* MainScript;
 
-	//MessageBox(0, "Mearsa", "Mearsa", MB_OK);
-	//if (GetAsyncKeyState(VK_SHIFT)) {
-	//	static void* getFunctionCaller = hook::pattern("E8 ? ? ? ? 90 EB 85 CC 48 CC").count(2).get(1).get<void>();
-	//	static void* getFunctinonCall = hook::get_call(getFunctionCaller);
-	//	GamePed player = PLAYER::PLAYER_PED_ID();
-	//	printf("player %i \n", player);
-	//	//_int64 __fastcall GIVE_WEAPON_TO_PED_REAL_FUNCTION(__int64 a1, unsigned int a2, unsigned int a3, char a4, char a5)
-	//	reinterpret_cast<void(__cdecl*)(__int64 a1, unsigned int a2, unsigned int a3, char a4, char a5)>(getFunctinonCall)(player, 0xBFE256D4, 30, 0, 0);
-	//}
+void Detest() {
+	printf("mearsa scriptu \n");
+	while (true) {
+		static bool Spawned = false;
+		if (!Spawned && GetAsyncKeyState(VK_F2)) {
 
+			STREAMING::REQUEST_MODEL(0x705E61F2);
+			while (!STREAMING::HAS_MODEL_LOADED(0x705E61F2))
+				MainScript->yield();
 
-	//if (GetAsyncKeyState(VK_SHIFT)) {
-	//	static void* getFunctionCaller = hook::get_pattern("48 89 5C 24 ? 57 48 83 EC 40 80 3D ? ? ? ? ? 41 8A D8 40 8A FA 75 5D E8 ? ? ? ? 4C 8B D8 48 85 C0 74 50", 1);
+			GamePed player = PLAYER::PLAYER_PED_ID();
+			auto coords = ENTITY::GET_ENTITY_COORDS(player, true);
 
+			PED::CREATE_PED(1, 0x705E61F2, coords.x, coords.y, coords.z, 0.f, true, false);
+			Spawned = true;
+			printf("sa spawnat cacatu \n");
 
-	//	GamePed player = PLAYER::PLAYER_PED_ID();
-	//	NativeVehicle vehicle = PED::GET_VEHICLE_PED_IS_USING(player);
-
-	//	printf("player %i \n", player);
-	//	printf("player vehicle %i", vehicle);
-	//
-	//	static auto PointerToHandleCaller = hook::pattern("E8 ? ? ? ? 48 8D 4D A7 8B D8 41 89 06 E8 ? ? ? ? 8B 55 6F 48 8D 0D ? ? ? ? 41 B8 ? ? ? ? 03 15 ? ? ? ? E8 ? ? ? ? 81 A6 ? ? ? ? ? ? ? ? 0F BA AE ? ? ? ? ? E9 ? ? ? ?").count(1).get(1).get<void>();
-	//	static auto PointerToHandleCal = hook::get_call(PointerToHandleCaller);
-	//		
-	//	
-	//	auto handle = reinterpret_cast<int(__cdecl*)(void* a1)>(PointerToHandleCal)(local_player);
-	//	//_int64 __fastcall GIVE_WEAPON_TO_PED_REAL_FUNCTION(__int64 a1, unsigned int a2, unsigned int a3, char a4, char a5)
-	//	//reinterpret_cast<void(__cdecl*)(__int64 a1, char a2, char a3)>(getFunctionCaller)(vehicle, 1, 0);
-	//}
-
-	//
-	
-	static bool Called = false;
-
-	if (!Called && CBaseFactory<CLevelLoader>::Get().state == GAME_STATE::IN_GAME) {
-		printf("Called spawn player faster \n");
-		GamePed player = PLAYER::PLAYER_PED_ID();
-
-		SCRIPT::SHUTDOWN_LOADING_SCREEN();
-		CAM::DO_SCREEN_FADE_IN(0);
-
-		ENTITY::SET_ENTITY_COORDS(player, 293.089f, 180.466f, 104.301f, true, true, true, false);
-		Called = true;
+		}
+		MainScript->yield();
 	}
 
-	//static bool m_hosted = false;
-	//if (GetAsyncKeyState(VK_SHIFT)) {
-	//	printf("NETWORK::NETWORK_IS_HOST() %d\n", NETWORK::NETWORK_IS_HOST());
-	//	if (!m_hosted && NETWORK::NETWORK_IS_HOST())
-	//	{
-	//		// NETWORK_SESSION_VALIDATE_JOIN
-	//		NETWORK::_NETWORK_SESSION_HOSTED(true);
-	//		//NETWORK::NETWORK_DO_TRANSITION_TO_FREEMODE()
-	//		printf("_NETWORK_SESSION_HOSTED \n");
-	//		m_hosted = true;
-	//	}
-	//}
-	//static bool hosted = false;
-	//if (!hosted && GetAsyncKeyState(VK_MENU)) {
-	//	//hostGame(0, 32, 0x0);
-	//	printf("trying hosting \n");
-	//	NETWORK::NETWORK_HOST_TRANSITION(1, 1, 1, 1, 0, true, true, 1, 1, 32768);
-	//	NETWORK::NETWORK_LAUNCH_TRANSITION();
-	//}
+	
 
-	return static_cast<decltype(&VMRun)>(run_script_threads_original)(ops_to_execute);
 }
-
 void CScriptVM::OnGameHook()
 {
-
+//	MainScript = new script(Detest);
+	//add_script(std::unique_ptr<script>(MainScript));
 }
 CScriptVM* g_ScriptVM = new CScriptVM();

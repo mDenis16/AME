@@ -61,11 +61,15 @@ CreateProcessW_HK(
     BOOL result = CreateProcessW_Original(lpApplicationName, lpCommandLine, lpProcessAttributes, lpThreadAttributes, bInheritHandles, dwCreationFlags, lpEnvironment, lpCurrentDirectory,
         lpStartupInfo, lpProcessInformation);
     auto str = std::wstring(lpApplicationName);
-
+    //MessageBoxW(0, str.c_str(), L" ", MB_OK);
     if (str.find(L"GTA5.exe") != std::wstring::npos) {
+        Sleep(1000);
           auto launchPath = RoSLauncher::GetLaunchPath("Software\\AME");
           auto dllPath = launchPath.append("\\Client.dll");
           LoadDll(dllPath, lpProcessInformation->dwProcessId);
+         // MessageBox(0, "Loading client.dll now", " ", MB_OK);
+          Sleep(1000);
+          
     }
     
     return result;
@@ -175,6 +179,7 @@ std::string RoSLauncher::GetLaunchPath(std::string path) {
     return ret;
 }
 void RoSLauncher::Hook() {
+   // MessageBox(0, "RoSLauncher::Hook", "Mearas", MB_OK);
 
     if (MH_Initialize() != MH_OK)
     {
@@ -203,7 +208,7 @@ void RoSLauncher::Unhook() {
       if (hModule == NULL)
           return;
 
-      pTarget = (LPVOID)GetProcAddress(hModule, "RoSLauncher");
+      pTarget = (LPVOID)GetProcAddress(hModule, "CreateProcessW");
       if (pTarget == NULL)
           return;
 

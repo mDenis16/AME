@@ -4,7 +4,7 @@
 unsigned long WINAPI initialize(void* instance) {
 
 
-//    MessageBox(0, "initialize", "instance", MB_OK);
+   //MessageBox(0, "CSteam::Initialize", "instance", MB_OK);
     CSteam::Initialize((HMODULE)instance);
     return 0;
 }
