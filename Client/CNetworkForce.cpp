@@ -36,8 +36,27 @@ static int ReturnTrue()
 bool IsSessionStarted() {
 	return reinterpret_cast<bool(__cdecl*)()>(g_isSessionStarted)();
 }
-void hostGame(int a1, int a2, int a3) {
-	//return reinterpret_cast<void(__cdecl*)(int a1, int a2, int a3)>(samp)(a1, a2, a3);
+static void* getNetworkManager()
+{
+	static void** networkMgrPtr = nullptr;
+
+	if (networkMgrPtr == nullptr)
+	{
+		networkMgrPtr = hook::get_address<void**>(hook::get_pattern("84 C0 74 2E 48 8B 0D ? ? ? ? 48 8D 54 24 20", 7));
+	}
+
+	return *networkMgrPtr;
+}
+
+bool hostGame(unsigned __int16 a2, __int64 a3, unsigned int a4) {
+	
+	void* mgr = getNetworkManager();
+
+	static auto addr_call = hook::pattern("E8 ? ? ? ? EB 36 41 B9 ? ? ? ? 41 B8 ? ? ? ? EB E2 41 B9 ? ? ? ? EB F0 8B 93 ? ? ? ? 41 B9 ? ? ? ? 48 8B CB 45 8D 41 E1 C7 44 24").count(1).get(0).get<void>();
+	static auto addr = hook::get_call(addr_call);
+
+
+	return reinterpret_cast<bool(__fastcall*)(void* ecx, unsigned __int16 a2, __int64 a3, unsigned int a4)>(addr)(mgr, a2, a3, a4);
 }
 void MigrateSessionCopy(char* target, char* source)
 {
@@ -65,7 +84,6 @@ static void fwClipSetManager_StartNetworkSessionHook()
 
 
 //E8 ? ? ? ? 40 8A C7 4C 8D 9C 24 ? ? ? ? 49 8B 5B 20 49 8B 6B 28 49 8B 73 30 49 8B 7B 38 49 8B E3 
-
 static char (*g_Host_Session)(__int64 a1, unsigned __int16 a2, __int64 a3, unsigned int a4);
 char __fastcall Host_SessionHK(__int64 a1, unsigned __int16 a2, __int64 a3, unsigned int a4)
 {
@@ -76,6 +94,18 @@ char __fastcall Host_SessionHK(__int64 a1, unsigned __int16 a2, __int64 a3, unsi
 
 	return result;
 }
+
+static char (*g_HostSession_Internal)(__int64 networkManager, _DWORD* a2, __int64 a3);
+char __fastcall HostSession_Internal(__int64 networkManager, _DWORD* a2, __int64 a3) {
+	
+	char result =  g_HostSession_Internal(networkManager, a2,a3);
+
+	spdlog::info("HostSession_Internal {}", (int)result);
+
+	return result;
+}
+
+
 
 //E8 ? ? ? ? 84 C0 74 E6 33 D2 8D 4A 01 E8 ? ? ? ? 84 C0 74 D8 85 FF 7E D4 
 static char (*g_CheckIfShouldAllowRelatedToHosting)(void* a1, char* a2, char a3);
@@ -119,17 +149,7 @@ char __fastcall CheckForNetGame(__int64 a1, __int64 a2, DWORD* a3, __int64 a4, i
 	
 	return g_CheckForNetGame(a1,a2,a3,a4,a5);
 }
-static void* getNetworkManager()
-{
-	static void** networkMgrPtr = nullptr;
 
-	if (networkMgrPtr == nullptr)
-	{
-		networkMgrPtr = hook::get_address<void**>(hook::get_pattern("84 C0 74 2E 48 8B 0D ? ? ? ? 48 8D 54 24 20", 7));
-	}
-
-	return *networkMgrPtr;
-}
 char __fastcall isNetworkHost(__int64 a1) {
 	return 1;
 }
@@ -235,13 +255,14 @@ hook::call(hook::get_pattern("48 83 F8 04 75 ? 40 88", 6), ExitCleanly);
 // (this function deletes network objects considered as duplicate)
 	hook::jump(hook::get_pattern("49 8B 0C 24 0F B6 51", -0x69), ReturnTrue);
 
-	/*auto HostSession_Call =
-	if (MH_CreateHook(HostSession_Call, &Host_SessionHK, reinterpret_cast<void**>(&g_Host_Session)) != MH_OK) {
-		std::cout << "Failed hooking run script threads " << std::endl;
+	auto HostSession_InternalTarget = hook::pattern("48 89 5C 24 ? 48 89 54 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 8D AC 24 ? ? ? ? 48 81 EC ? ? ? ? 41 BE ? ? ? ? 45 8B E0 48 8B FA 4C 8B F9 44 84 B1 ? ? ? ?").count(1).get(0).get<void>();
+
+	if (MH_CreateHook(HostSession_InternalTarget, &HostSession_Internal, reinterpret_cast<void**>(&g_HostSession_Internal)) != MH_OK) {
+		std::cout << "Failed hooking   HostSession_Internal " << std::endl;
 	}
 
-	if (MH_EnableHook(HostSession_Call) != MH_OK)
-		MessageBox(0, "Failed hooking Waitcalll thread. ", "CScriptVM::Hook", MB_ICONERROR);*/
+	if (MH_EnableHook(HostSession_InternalTarget) != MH_OK)
+		MessageBox(0, "Failed hooking HostSession_Internal thread. ", "HostSession_Internal", MB_ICONERROR);
 
 	
 	auto stringComparer = hook::pattern("E8 ? ? ? ? 84 C0 74 E6 33 D2 8D 4A 01 E8 ? ? ? ? 84 C0 74 D8 85 FF 7E D4").count(1).get(0).get<void>();
@@ -289,16 +310,16 @@ hook::call(hook::get_pattern("48 83 F8 04 75 ? 40 88", 6), ExitCleanly);
 
 	//Host_SessionInternal
 	//E8 ? ? ? ? 4C 8D 9C 24 ? ? ? ? 49 8B 5B 20 49 8B 73 28 49 8B 7B 30 49 8B E3 41 5E 41 5D 5D
-	auto Host_SessionInternalCaller = hook::pattern("E8 ? ? ? ? 4C 8D 9C 24 ? ? ? ? 49 8B 5B 20 49 8B 73 28 49 8B 7B 30 49 8B E3 41 5E 41 5D 5D").count(4).get(3).get<void>();
-	auto Host_SessionInternalCall = hook::get_call(Host_SessionInternalCaller);
+	//auto Host_SessionInternalCaller = hook::pattern("E8 ? ? ? ? 4C 8D 9C 24 ? ? ? ? 49 8B 5B 20 49 8B 73 28 49 8B 7B 30 49 8B E3 41 5E 41 5D 5D").count(4).get(3).get<void>();
+	//auto Host_SessionInternalCall = hook::get_call(Host_SessionInternalCaller);
 
-	printf("Host_SessionInternalCall %p \n", Host_SessionInternalCall);
-	if (MH_CreateHook(Host_SessionInternalCall, &Host_SessionInternal, reinterpret_cast<void**>(&g_Host_SessionInternal)) != MH_OK) {
-		std::cout << "Failed hooking Host_SessionInternalCall" << std::endl;
-	}
+	//printf("Host_SessionInternalCall %p \n", Host_SessionInternalCall);
+	//if (MH_CreateHook(Host_SessionInternalCall, &Host_SessionInternal, reinterpret_cast<void**>(&g_Host_SessionInternal)) != MH_OK) {
+	//	std::cout << "Failed hooking Host_SessionInternalCall" << std::endl;
+	//}
 
-	if (MH_EnableHook(Host_SessionInternalCall) != MH_OK)
-		MessageBox(0, "Failed Host_SessionInternalCall. ", "Host_SessionInternalCall", MB_ICONERROR);
+	//if (MH_EnableHook(Host_SessionInternalCall) != MH_OK)
+	//	MessageBox(0, "Failed Host_SessionInternalCall. ", "Host_SessionInternalCall", MB_ICONERROR);
 
 	//CheckForNetGame
 	//E8 ? ? ? ? 84 C0 0F 84 ? ? ? ? 48 8B 05 ? ? ? ? 4C 8B 0D ? ? ? ? 4C 8B 05 ? ? ? ? 48 8B 15 ? ? ? ? 48 8B 8F ? ? ? ? C6 44 24 ? ? 48 89 44 24 ? 48 8B 05 ? ? ? ? 
@@ -429,30 +450,19 @@ void CNetworkForce::OnGameFrame() {
 
 	//static auto setgamerInfo = hook::get_pattern("3A D8 0F 95 C3 40 0A DE 40", -0x56);
 //	auto networkMgr = getNetworkManager();
-	//static bool CAlled = false;
-	//if (!CAlled) {
-	//	CAlled = true;
-	//	// ignore CMsgJoinRequest failure reason '7' (seemingly related to tunables not matching?)
-	//	hook::put<uint8_t>(hook::pattern("84 C0 75 0B 41 BC 07 00 00 00").count(1).get(0).get<void>(2), 0xEB);
-
-	//	// also ignore the rarer CMsgJoinRequest failure reason '13' (something related to what seems to be like stats)
-	//	hook::put<uint8_t>(hook::pattern("3B ? 74 0B 41 BC 0D 00 00 00").count(1).get(0).get<void>(2), 0xEB);
-
-	//	// ignore CMsgJoinRequest failure reason 15 ('mismatching network timeout')
-	//	hook::put<uint8_t>(hook::get_pattern("74 0B 41 BC 0F 00 00 00 E9", 0), 0xEB);
-
-	//}
+	
 	
 	if (!NETWORK::NETWORK_IS_IN_SESSION() && GetAsyncKeyState(VK_SHIFT)) {
 		//HostSessionCall
-		auto networkMgr = getNetworkManager();
+		
 		static auto AlsoCreatesSessionWithoutManyChecks = hook::pattern("48 8B C4 48 89 58 08 48 89 70 10 48 89 78 18 55 48 8D A8 ? ? ? ? 48 81 EC ? ? ? ? 48 8B F9 48 8B 89 ? ? ? ? 83 39 03 75 42 48 8D 9F ? ? ? ? 48 8B CB E8 ? ? ? ? 48 8B CB 48 8B").count(1).get(0).get<void>();
 
 		printf("NETWORK_SESSION_HOST \n");
 		tryHosting = true;
 		//reinterpret_cast<__int64(__fastcall*)(void* networkManager, __int64 a2)>(AlsoCreatesSessionWithoutManyChecks)(networkMgr, 1);
 		//HostSessionInternal((__int64)networkMgr, 0, 32, 0x100 | 0x12);
-    	NETWORK::NETWORK_SESSION_HOST(0, 32, false);
+	//	hostGame(0, 32, 0x0);
+		NETWORK::NETWORK_SESSION_HOST_SINGLE_PLAYER(false);
 		tryHosting = false;
 
 		//printf("NETWORK_CAN_ENTER_MULTIPLAYER %s \n", NETWORK::NETWORK_CAN_ENTER_MULTIPLAYER()? "true" : "false");

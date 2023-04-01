@@ -369,7 +369,7 @@ static bool ReadDataNodeStub(void* node, uint32_t flags, void* mA0, datBitBuffer
 		assert(in == 0x5A);
 	}*/
 
-	bool didRead = g_origReadDataNode(node, flags, mA0, buffer, object);
+	bool didRead = g_origReadDataNode(node, flags, mA0, buffer, g_curNetObject);
 
 	if (didRead && g_curNetObject)
 	{
@@ -470,7 +470,7 @@ static void JoinPhysicalPlayerOnHost(void* bubbleMgr, CNetGamePlayer* player)
 	g_origJoinBubble(bubbleMgr, player);
 
 	
-	SetupLocalPlayer(player);
+	//SetupLocalPlayer(player);
 	spdlog::info("JoinPhysicalPlayerOnHost ");
 	
 }
@@ -646,31 +646,13 @@ static uint8_t netObject__GetPlayerOwnerId(netObject* object)
 
 	return owner ? owner->physicalPlayerIndex() : 0xFF;
 }
-static bool ReturnTrueAndKillThatTask(char* playerObj)
-{
-	char* ped = *(char**)(playerObj + 80);
-	char* task = *(char**)(ped + 32); // why is this in fwEntity anyway?
 
-	task[308] = 0;
-
-	return true;
-}
 void CSyncManager::Hook()
 {
-
 	g_pedFactory = hook::get_address<decltype(g_pedFactory)>(hook::get_pattern("E8 ? ? ? ? 48 8B 05 ? ? ? ? 48 8B 58 08 48 8B CB E8", 8));
-	hook::return_function(hook::pattern("48 83 64 24 30 00 83 4C 24 28 FF 33 D2 48").count(1).get(0).get<void>(-4));
-
-	auto add_log_target = hook::pattern("48 8B C4 48 89 48 08 48 89 50 10 4C 89 40 18 4C 89 48 20 48 83 EC 38 48 83 3D ? ? ? ? ? 74 38 4C 8B C1").count(1).get(0).get<void>();
-
-	MH_CreateHook(add_log_target, AddLog, nullptr);
-
-	auto write_data_node_stub = hook::pattern("48 89 5C 24 ? 44 89 44 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 81 EC ? ? ? ? 4D 8B F9 44 8B E2 4C 8B F1 85 51 28 0F 84 ? ? ? ? 83 79 30 00 74 0A").count(1).get(0).get<void>();
-
 	rage__s_NetworkTimeThisFrameStart = hook::get_address<uint32_t*>(hook::get_pattern("49 8B 0F 40 8A D6 41 2B C4 44 3B 25", 12));
 	rage__s_NetworkTimeLastFrameStart = hook::get_address<uint32_t*>(hook::get_pattern("89 05 ? ? ? ? 48 8B 01 FF 50 10 80 3D", 2));
 
-	MH_CreateHook(hook::get_pattern("41 56 41 57 48 83 EC 40 0F B6 72 ? 4D 8B E1", -0x14), SendCloneSync, (void**)&g_origSendCloneSync);
 
 	// replace joining local net player to bubble
 	{
@@ -681,111 +663,21 @@ void CSyncManager::Hook()
 	}
 
 	{
-		auto match = hook::pattern("80 F9 20 73 13 48 8B").count(1);
-		MH_CreateHook(match.get(0).get<void>(0), GetPlayerByIndex, (void**)&g_origGetPlayerByIndex);
-
-		// #2 is arxan in 1868
-		MH_CreateHook(hook::get_call(hook::get_pattern("40 0F 92 C7 40 84 FF 0F 85 ? ? ? ? 40 8A CE E8", 16)), GetPlayerByIndex, nullptr);
-	}
-
-	MH_CreateHook(write_data_node_stub, WriteDataNodeStub, (void**)&g_origWriteDataNode);
-
-	{
-		MH_CreateHook(hook::get_pattern("75 07 85 C9 0F 94 C3 EB", -0x19), IsNetworkPlayerActive, (void**)&g_origIsNetworkPlayerActive);
-		MH_CreateHook(hook::get_pattern("75 07 85 C9 0F 94 C0 EB", -0x13), IsNetworkPlayerConnected, (void**)&g_origIsNetworkPlayerConnected); // connected
-	}
-	{
-		auto location = hook::get_pattern<char>("44 0F 28 CF F3 41 0F 59 C0 F3 44 0F 59 CF F3 44 0F 58 C8 E8", 19);
-		MH_CreateHook(hook::get_call(location + 0), netInterface_GetNumRemotePhysicalPlayers, (void**)&g_origGetNetworkPlayerListCount);
-		MH_CreateHook(hook::get_call(location + 8), netInterface_GetRemotePhysicalPlayers, (void**)&g_origGetNetworkPlayerList);
-	}
-	{
-		auto location = hook::get_pattern<char>("48 8B F0 85 DB 74 56 8B", -0x34);
-		MH_CreateHook(hook::get_call(location + 0x28), netInterface_GetNumPhysicalPlayers, (void**)&g_origGetNetworkPlayerListCount2);
-		MH_CreateHook(hook::get_call(location + 0x2F), netInterface_GetAllPhysicalPlayers, (void**)&g_origGetNetworkPlayerList2);
-	}
-	{
-		auto location = hook::get_pattern("74 ? 48 8B 88 ? ? ? ? 48 85 C9 74 ? E8 ? ? ? ? 0F B6", 14);
-
-		hook::set_call(&g_origGetOwnerPlayerId, location);
-		hook::call(location, netObject__GetPlayerOwnerId);
-	}
-
-	//	static auto AllocatenetBlenderParent = hook::pattern("48 8B C4 48 89 58 08 48 89 68 10 48 89 70 18 48 89 78 20 41 54 41 56 41 57 48 83 EC 20 48 8B 79 50").count(1).get(0).get<void>();
-		//MH_CreateHook(AllocatenetBlenderParent, AllocateNetBlender, (void**)&g_AllocateNetBlender); //
-	{
 		MH_CreateHook(hook::get_pattern("48 83 79 48 00 48 8B FA 48 8B D9 74 40", -10), ManuallyDirtyNodeStub, (void**)&g_origManuallyDirtyNode);
 		MH_CreateHook(hook::get_pattern("85 51 28 0F 84 E4 00 00 00 33 DB", -0x24), netSyncDataNode_ForceSendStub, (void**)&g_orig_netSyncDataNode_ForceSend);
 		MH_CreateHook(hook::get_pattern("44 85 41 28 74 73 83 79 30 00", -0x1F), netSyncDataNode_ForceSendToPlayerStub, (void**)&g_orig_netSyncDataNode_ForceSendToPlayer);
-	}
-	MH_CreateHook(hook::get_pattern("48 8B 03 48 8B D6 48 8B CB EB 06", -0x48), ReadDataNodeStub, (void**)&g_origReadDataNode);
-
-	MH_CreateHook(hook::get_pattern("48 8B F2 0F B7 52 0A 41 B0 01", -0x19), netObjectMgrBase__RegisterNetworkObject, (void**)&g_orig_netObjectMgrBase__RegisterNetworkObject); //
-
-	MH_CreateHook(hook::get_pattern("33 DB 48 8B F9 48 39 99 ? ? 00 00 74 ? 48 81 C1 E0", -10), AllocateNetPlayer, (void**)&g_origAllocateNetPlayer);
-
-	MH_CreateHook(hook::get_pattern("8A 41 49 3C FF 74 17 3C 20 73 13 0F B6 C8"), netObject__GetPlayerOwner, (void**)&g_origGetOwnerNetPlayer);
-
-	// always allow to migrate, even if not cloned on bit test
-	hook::put<uint8_t>(hook::get_pattern("75 29 48 8B 02 48 8B CA FF 50"), 0xEB);
-
-
-	{
-		{
-			auto floc = hook::get_pattern<char>("84 C0 0F 84 39 01 00 00 48 39 77", -0x2B);
-			hook::set_call(&g_origCallSkip, floc + 0xD9);
-			hook::call(floc + 0xD9, SkipCopyIf1s);
-		}
-	}
-	// NETWORK_GET_PLAYER_INDEX_FROM_PED
-	{
-		auto location = hook::get_pattern("74 ? 48 8B 88 ? ? ? ? 48 85 C9 74 ? E8 ? ? ? ? 0F B6", 14);
-
-		hook::set_call(&g_origGetOwnerPlayerId, location);
-		hook::call(location, netObject__GetPlayerOwnerId);
-	}
-
-	{	MH_CreateHook(hook::get_pattern("49 C1 FA 03 41 83 E1 07 4C 03 D1 B9 20 00 00 00", -0xE), _netBuffer_WriteUnsigned, (void**)&g_orig_netBuffer_WriteUnsigned);
-
-	MH_CreateHook(hook::get_pattern("41 8D 40 FF 41 C1 FA 03 45", -0x1C), _netBuffer_ReadUnsigned, (void**)&g_orig_netBuffer_ReadUnsigned);
-
-	MH_CreateHook(hook::get_pattern("01 51 10 8B 41 10 3B 41 14 7E 03"), _netBuffer_BumpReadWriteCursor, (void**)&g_orig_netBuffer_BumpReadWriteCursor);
-
-	MH_CreateHook(hook::get_pattern("01 51 10 8B 41 10 3B 41 18 7E 03"), _netBuffer_BumpWriteCursor, (void**)&g_orig_netBuffer_BumpWriteCursor);
 	}
 
 	g_playerMgr = *hook::get_address<netPlayerMgrBase**>(hook::get_pattern("40 80 FF 20 72 B3 48 8B 0D", 9));
 	g_objectMgr = hook::get_address<netObjectMgr**>(hook::get_pattern("2B C3 3D 88 13 00 00 0F 82 ? ? ? ? 48 8B 05", 16));
 	g_queryFunctions = hook::get_address<netInterface_queryFunctions**>(hook::get_pattern("72 23 48 8B 0D ? ? ? ? 48 85 C9 74", 5));
-	netSynctreeFirstArg = hook::pattern("48 8B 0D ? ? ? ? 45 33 C0 E8 ? ? ? ? 48 8B C8 E8 ? ? ? ? 48 8D BD ? ? ? ? 48 8B 0F 48 8B D8 48 3B C8 74").count(1).get(0).get<void>(1);
-	
-	hook::jump(hook::pattern("48 85 C0 74 13 ? ? ? ? 74 0D 48 85 DB 74 19").count(1).get(0).get<void>(-0x37), ReturnTrueAndKillThatTask);
-
-	{auto location = hook::get_pattern("FF 90 ? ? ? ? 84 C0 0F 84 80 00 00 00 49", 0);
-	hook::nop(location, 6);
-	hook::call(location, mD0Stub);
-	}
-	hook::nop(hook::get_pattern("0F A3 C7 73 18 44", 3), 2);
-
-	// same for CNetObjPed
-	{
-		auto location = hook::get_pattern<char>("48 81 EC A0 01 00 00 33 FF 48 8B D9", -0x15);
-
-		auto stackSize = (0x20 + (256 * 8) + (256 * 4));
-		auto ptrsBase = 0x20;
-		auto intsBase = ptrsBase + (256 * 8);
-
-		hook::put<uint32_t>(location + 0x18, stackSize);
 
 
-		hook::put<uint32_t>(location + 0x13F, stackSize);
-		hook::put<uint32_t>(location + 0xD8, intsBase);
-		
-	}
-//	MH_CreateHook(hook::get_pattern("4F 8D 04 49 41 FF", -0x42), fwSceneUpdate__AddToSceneUpdate_Track, (void**)&fwSceneUpdate__AddToSceneUpdate);
-	//MH_CreateHook(hook::get_pattern("F7 D3 21 58 10 0F", -0x3F), fwSceneUpdate__RemoveFromSceneUpdate_Track, (void**)&fwSceneUpdate__RemoveFromSceneUpdate);
+	MH_CreateHook(hook::get_pattern("48 8B F2 0F B7 52 0A 41 B0 01", -0x19), netObjectMgrBase__RegisterNetworkObject, (void**)&g_orig_netObjectMgrBase__RegisterNetworkObject); //
 
-	
+	MH_CreateHook(hook::get_pattern("33 DB 48 8B F9 48 39 99 ? ? 00 00 74 ? 48 81 C1 E0", -10), AllocateNetPlayer, (void**)&g_origAllocateNetPlayer);
+
+
 	EnsureCreateCloneFuncs();
 }
 
@@ -1120,7 +1012,60 @@ public:
 	char pad_0290[560]; //0x0290
 }; //Size: 0x0030
 
+char __fastcall DirtNodeChildren(__int64 syncTree, __int64 object)
+{
+	auto stTree = (netSyncTreeRE*)(syncTree);
+	char v4; // bl
+	int v5; // edi
+	_QWORD* i; // rsi
+	spdlog::info("syncTree m_child_node_count {}", *(_DWORD*)(syncTree + 0x20));
+	v4 = 1;
+	//((void (*)(void))sub_7FF7BCA045DC)();
+	if (!(*(unsigned __int8(__fastcall**)(__int64))(*(_QWORD*)object + 160i64))(object)) {
+		spdlog::info("returned by unknownfuncitons ");
+		return 0;
+	}
+	v5 = 0;
 
+
+
+
+	if (stTree->m_child_node_count)
+	{ //loops through child nodes
+
+
+
+		for (size_t i = 0; i < stTree->m_child_node_count; i++)
+		{
+
+			auto child_node = stTree->m_child_nodes[i];
+			netSyncDataNode_ForceSendStub((netSyncDataNodeBase*)child_node, 1, 0, (netObject*)object);
+			netSyncDataNode_ForceSendToPlayerStub((netSyncDataNodeBase*)child_node, 31, 1, 0, (netObject*)object);
+			ManuallyDirtyNodeStub((netSyncDataNodeBase*)child_node, (netObject*)object);
+
+			if (i == 18) {
+				auto creation_node = (CPlayerCreationDataNode*)(child_node);
+				spdlog::info("creation_node");
+			}
+			bool result = (*(unsigned __int8(__fastcall**)(_QWORD, __int64))(*(_QWORD*)child_node + 168i64))((_QWORD)child_node, object);
+			spdlog::info("i = {} child node {} result is {}", i, (void*)child_node, result);
+
+		}
+		/*	for (i = (_QWORD*)(syncTree + 0x30);
+				!*(_BYTE*)(*i + 64i64);
+				++i)
+			{
+				bool result = (*(unsigned __int8(__fastcall**)(_QWORD, __int64))(*(_QWORD*)*i + 168i64))(*i, object);
+
+				spdlog::info("current_child_addr = {} apply status {} " , (uint64)i , result);
+				if ((unsigned int)++v5 >= *(_DWORD*)(syncTree + 0x20))
+					return v4;
+			}
+			spdlog::info("returned 0  from CanApplyToObjectRE current v5 {}", v5);*/
+		return 0;
+	}
+	return 0;
+}
 char __fastcall CanApplyToObjectRE(__int64 syncTree, __int64 object)
 {
 	auto stTree = (netSyncTreeRE*)(syncTree);
@@ -1148,26 +1093,17 @@ char __fastcall CanApplyToObjectRE(__int64 syncTree, __int64 object)
 		{
 			
 			auto child_node = stTree->m_child_nodes[i];
+			//netSyncDataNode_ForceSendStub((netSyncDataNodeBase*)child_node, 1, 0, (netObject*)object);
+			//netSyncDataNode_ForceSendToPlayerStub((netSyncDataNodeBase*)child_node, 31, 1, 0, (netObject*)object);
+
 			if (i == 0) {
 				auto creation_node = (CPlayerCreationDataNode*)(child_node);
-				
-				//creation_node->m_model = 0x9B22DBAF;
 			}
 			bool result = (*(unsigned __int8(__fastcall**)(_QWORD, __int64))(*(_QWORD*)child_node + 168i64))((_QWORD)child_node, object);
 			spdlog::info("i = {} child node {} result is {}", i, (void*)child_node, result);
 
 		}
-	/*	for (i = (_QWORD*)(syncTree + 0x30);
-			!*(_BYTE*)(*i + 64i64);
-			++i)
-		{
-			bool result = (*(unsigned __int8(__fastcall**)(_QWORD, __int64))(*(_QWORD*)*i + 168i64))(*i, object);
-
-			spdlog::info("current_child_addr = {} apply status {} " , (uint64)i , result);
-			if ((unsigned int)++v5 >= *(_DWORD*)(syncTree + 0x20))
-				return v4;
-		}
-		spdlog::info("returned 0  from CanApplyToObjectRE current v5 {}", v5);*/
+	
 		return 0;
 	}
 	return 0;
@@ -1178,7 +1114,7 @@ void CSyncManager::HandleCloneCreate(datBitBuffer& receivedBuff) {
 
 	//auto syncTree = netSyncTree::GetForType(NetObjEntityType::Player);
 	
-	datBitBuffer buf(receivedBuff.m_data, receivedBuff.m_curBit);
+	datBitBuffer buf(receivedBuff.m_data, receivedBuff.GetDataLength());
 	buf.m_f1C = 1;
 
 
@@ -1187,9 +1123,9 @@ void CSyncManager::HandleCloneCreate(datBitBuffer& receivedBuff) {
 	auto owner = 31;
 
 	// create the object
-	auto obj = CreateCloneObject(NetObjEntityType::Player, 56, owner, 0, 32);
+	auto obj = CreateCloneObject(NetObjEntityType::Player, rand(), owner, 0, 32);
 	g_curNetObject = obj;
-	auto syncTree = obj->GetSyncTree();
+	auto syncTree = netSyncTree::GetForType(NetObjEntityType::Player);
 
 	if (!obj)
 	{
@@ -1198,10 +1134,14 @@ void CSyncManager::HandleCloneCreate(datBitBuffer& receivedBuff) {
 		return;
 	}
 	syncTree->ReadFromBuffer(1, 0, &buf, nullptr);
+	if (!CanApplyToObjectRE((long long)syncTree, (long long)obj))
+	{
+		spdlog::info("couldn't apply object {}", __func__);
 
+	}
 
-	auto creation_tree = (CPlayerCreationDataNode*)syncTree->GetCreationDataNode();
-
+//	auto creation_tree = (CPlayerCreationDataNode*)syncTree->GetCreationDataNode();
+//	creation_tree->m_model = 0x0D7114C9;
 	if (!CanApplyToObjectRE((long long)syncTree, (long long)obj))
 	{
 		spdlog::info("couldn't apply object {}", __func__);
@@ -1244,99 +1184,43 @@ void CSyncManager::HandleCloneCreate(datBitBuffer& receivedBuff) {
 		ENTITY::SET_ENTITY_COORDS_NO_OFFSET(PLAYER::PLAYER_PED_ID(), 0, 0, 0, true, true, true);
 		spdlog::info("Remote player coords {} {} {}", remote_coords.x, remote_coords.y, remote_coords.z);
 	}
+	obj->syncData.creationAckedPlayers = 1;
 }
 
 static bool WrittenToBuffer = false;
 
 netObject* CSyncManager::CreateCloneToLocalPlayer() {
 	
-	
-
+	static char bluh[1000];
+	static size_t writtenSize = 0;
 	if (EnsurePlayer31()) {
 		auto ts = *rage__s_NetworkTimeLastFrameStart;
 		auto local = GetLocalPlayer();
 		auto local_ped = getPlayerPedForNetPlayer(g_playerMgr->localPlayer);
 		auto local_net = GetLocalPlayerPedNetObject();
-		if (local) {
-		
-		//	if (!WrittenToBuffer) {
+		static bool Written = false;
+		if (Written) {
+			auto st = netSyncTree::GetForType(NetObjEntityType::Player);
+			datBitBuffer buffer(bluh, writtenSize);
+			if (st->ReadFromBuffer(1, 0, &buffer, nullptr)) {
+				CPlayerCreationDataNode* node = (CPlayerCreationDataNode*)st->GetCreationDataNode();
+				spdlog::info("remote net model_hash {}", node->m_model);
+			}
 
-				// allocate a RAGE buffer
-				const auto st = netSyncTree::GetForType(NetObjEntityType::Player);
-				uint8_t packetStub[1500] = { 0 };
-				datBitBuffer rlBuffer(packetStub, sizeof(packetStub));
-				st->WriteTreeCfx(1, 0, local_net, &rlBuffer, (*CSyncManager::g_queryFunctions)->GetTimestamp(), nullptr, 31, nullptr, nullptr);
-				uint32_t lastChangeTime;
-
-
-				size_t nodeIdx = GET_NIDX(local_net->GetSyncTree(), local_net->GetSyncTree()->GetCreationDataNode());
-				const auto& sd = g_syncData[local_net->GetObjectId()];
-
-				if (!sd)
-				{
-					return nullptr;
-				}
-
-				auto& nodeData = sd->nodes[nodeIdx];
-				datBitBuffer buf(packetStub, rlBuffer.m_curBit);
-				buf.m_f1C = 1;
-				const auto st2 = netSyncTree::GetForType(NetObjEntityType::Player);
-			
-				st2->ReadFromBuffer(1, 0, &buf, nullptr);
-				// owner ID (forced to be remote so we can call ChangeOwner later)
-				auto isRemote = true;
-				auto owner = 31;
-
-				// create the object
-				auto obj = CreateCloneObject(NetObjEntityType::Ped, 56, owner, 0, 32);
-				obj->syncData.ownerId = 31;
-				obj->syncData.isRemote = false;
-				obj->syncData.creationAckedPlayers = 0;
-				obj->syncData.nextOwnerId = 255;
-				
-				g_curNetObject = obj;
-				
-
-				if (!obj)
-				{
-					spdlog::info("couldn't create object {} \n", __func__);
-
-					return nullptr;
-				}
-	
-
-
-
-				if (!CanApplyToObjectRE((long long)st2, (long long)obj))
-				{
-					spdlog::info("couldn't apply object {}", __func__);
-
-				}
-				if (!st2->CanApplyToObject(obj)) {
-					spdlog::info("couldn't apply object {}", __func__);
-					return nullptr;
-				}
-				st2->ApplyToObject(obj, nullptr);
-				(*g_objectMgr)->RegisterNetworkObject(obj);
-			//	auto st = local_net->GetSyncTree();
-			//	//dmp_sync_tree_ida((long long)st);
-
-			//	uint8_t packetStub[1500] = { 0 };
-			//	datBitBuffer rlBuffer(packetStub, sizeof(packetStub));
-			///*	auto local_creation_data_node = (CPlayerCreationDataNode*)(creation_data);
-			//	local_creation_data_node->m_model = 0x9B22DBAF;*/
-			//	g_curNetObject = local_net;
-			
-			//	datBitBuffer remoteBuffer(packetStub, rlBuffer.m_curBit);
-			//	remoteBuffer.m_f1C = 1;
-			//
-			//	spdlog::info("a scris {} {}", rlBuffer.m_curBit, rlBuffer.GetDataLength());
-
-			//	HandleCloneCreate(remoteBuffer);
-
-				//WrittenToBuffer = true;
-			//}
 		}
+		else {
+		
+			memset(bluh, 0, sizeof(bluh));
+
+			datBitBuffer buffer(bluh, sizeof(bluh));
+			auto st = local_net->GetSyncTree();
+			st->WriteTreeCfx(1, 0, local_net, &buffer, 0, nullptr, 31, nullptr, nullptr);
+			CPlayerCreationDataNode* node = (CPlayerCreationDataNode*)st->GetCreationDataNode();
+			spdlog::info("local net model_hash {}", node->m_model);
+			writtenSize = buffer.GetDataLength();
+			Written = true;
+		}
+		
 	}
 	return nullptr;
 	
@@ -2024,41 +1908,11 @@ CNetGamePlayer* netObject__GetPlayerOwner(netObject* object)
 	//spdlog::info("netObject__GetPlayerOwner called for objectId {}", object->objectId);
 	if (object && object->syncData.ownerId == 31)
 	{
-		if (object->objectId == 1) {
-//			auto player = g_playersByNetId[TheClones->GetClientId(object)];
-//
-//			// FIXME: figure out why bad playerinfos occur
-//			if (player != nullptr && player->GetPlayerInfo() != nullptr)
-//			{
-//				return player;
-//			}
-//
-//#ifdef IS_RDR3
-//			return nullptr;
-//#endif
-			return CSyncManager::GetLocalPlayer();
-		}
 
 		CSyncManager::EnsurePlayer31();
 		return CSyncManager::g_player31;
 	}
-	if (object && object->syncData.ownerId == 31)
-	{
-//		auto player = g_playersByNetId[TheClones->GetClientId(object)];
-//
-//		// FIXME: figure out why bad playerinfos occur
-//		if (player != nullptr && player->GetPlayerInfo() != nullptr)
-//		{
-//			return player;
-//		}
-//
-//#ifdef IS_RDR3
-//		return nullptr;
-//#endif
 
-		CSyncManager::EnsurePlayer31();
-		return CSyncManager::g_player31;
-	}
 
 	return CSyncManager::g_playerMgr->localPlayer;
 }
@@ -2121,7 +1975,6 @@ bool netSyncTree::WriteTreeCfx(int flags, int objFlags, netObject* object, datBi
 
 	if (!syncData)
 	{
-		spdlog::info("Failed to write tree cfx for flags {}", flags);
 		return false;
 	}
 
@@ -2142,19 +1995,29 @@ bool netSyncTree::WriteTreeCfx(int flags, int objFlags, netObject* object, datBi
 		*lastChangeTime = 0;
 	}
 
-	if (flags == 2 || flags == 4) //for sync
+	if (flags == 2 || flags == 4)
 	{
 		// mA0 bit
 		buffer->WriteBit(objFlags & 1);
 	}
 
-
+#ifdef IS_RDR3
+	buffer->WriteBit(0);
+#endif
 
 	// #NETVER: 2018-12-27 17:41 -> increased maximum packet size to 768 from 256 to account for large CPlayerAppearanceDataNode
-//	static auto icgi = Instance<ICoreGameInit>::Get();
+	//static auto icgi = Instance<ICoreGameInit>::Get();
 
-	auto sizeLength = 16;
+	int sizeLength = 13;
 
+	//if (icgi->OneSyncBigIdEnabled)
+	{
+		sizeLength = 16;
+	}
+	///else if (icgi->NetProtoVersion < 0x201812271741)
+	//{
+	//	sizeLength = 11;
+	//}
 
 	eastl::bitset<200> processedNodes;
 
@@ -2179,13 +2042,13 @@ bool netSyncTree::WriteTreeCfx(int flags, int objFlags, netObject* object, datBi
 					buffer->WriteBit(0);
 				}
 
-//				// write Cfx length placeholder
-//				if (node->IsDataNode())
-//				{
-//#ifndef ONESYNC_CLONING_NATIVES
-//					buffer->WriteUns(0, sizeLength);
-//#endif
-//				}
+				// write Cfx length placeholder
+				if (node->IsDataNode())
+				{
+#ifndef ONESYNC_CLONING_NATIVES
+					buffer->WriteUns(0, sizeLength);
+#endif
+				}
 			}
 
 			if (node->IsParentNode())
@@ -2221,7 +2084,7 @@ bool netSyncTree::WriteTreeCfx(int flags, int objFlags, netObject* object, datBi
 					//	LoadPlayerAppearanceDataNode(dataNode);
 #endif
 
-						datBitBuffer tempBuf(tempData.data(), tempData.size());
+						datBitBuffer tempBuf(tempData.data(), (sizeLength == 11) ? 256 : tempData.size());
 						dataNode->WriteObject(state.object, &tempBuf, state.logger, true);
 
 #ifdef GTA_FIVE
@@ -2246,8 +2109,11 @@ bool netSyncTree::WriteTreeCfx(int flags, int objFlags, netObject* object, datBi
 
 					auto dataNode = (netSyncDataNodeBase*)node;
 
+#ifdef GTA_FIVE
 					static_assert(offsetof(netSyncDataNodeBase, externalDependentNodeRoot) == 0x50, "parentData off");
-
+#elif IS_RDR3
+					static_assert(offsetof(netSyncDataNodeBase, externalDependentNodeRoot) == 0x48, "parentData off");
+#endif
 
 					// if we are a data node, we will have to ensure external-dependent nodes are sent as a bundle at all times
 					// this means:
@@ -2262,8 +2128,9 @@ bool netSyncTree::WriteTreeCfx(int flags, int objFlags, netObject* object, datBi
 						auto rootNode = dataNode;
 
 						while (rootNode->externalDependentNodeRoot)
+						{
 							rootNode = rootNode->externalDependentNodeRoot;
-						
+						}
 
 						if (rootNode)
 						{
@@ -2284,14 +2151,16 @@ bool netSyncTree::WriteTreeCfx(int flags, int objFlags, netObject* object, datBi
 						}
 					}
 					else
+					{
 						updateNode(dataNode, nodeData->manuallyDirtied);
-					
+					}
 				}
 
 				// resend skipping is broken, perhaps?
 				bool isResendSkipped = false;//((state.time - nodeData->lastResend) < 150);
 
 				if (state.pass == 2)
+				{
 					if (state.lastChangeTimePtr)
 					{
 						auto oldVal = *state.lastChangeTimePtr;
@@ -2303,44 +2172,59 @@ bool netSyncTree::WriteTreeCfx(int flags, int objFlags, netObject* object, datBi
 							nodeData->lastResend = state.time;
 						}
 					}
-				
+				}
 
 				bool shouldWriteNode = false;
 
 				if (!(node->flags2 & state.flags))
+				{
 					shouldWriteNode = true;
-				
+				}
 
 				if (nodeData->lastAck < nodeData->lastChange)
+				{
 					shouldWriteNode = true;
-				
+				}
 
 				if (isResendSkipped)
+				{
 					shouldWriteNode = false;
-				
+				}
 
 				if (shouldWriteNode)
 				{
 					if (state.pass == 2)
+					{
 						buffer->WriteBits(std::get<0>(nodeData->currentData).data(), std::get<1>(nodeData->currentData), 0);
+					}
+
 					didWrite = true;
 				}
 			}
 
 			if (!didWrite)
+			{
 				if (state.pass == 2)
+				{
 					// set position to just past the 0
 					if (node->flags2 & state.flags)
+					{
 						buffer->Seek(startPos + 1);
+					}
 					else
+					{
 						buffer->Seek(startPos);
+					}
+				}
+			}
 			else
 			{
 				state.wroteAny = true;
 
 				if (state.object)
-					g_netObjectNodeMapping[state.object->GetObjectId()][node] = { 1, (*CSyncManager::g_queryFunctions)->GetTimestamp() };
-				
+				{
+					g_netObjectNodeMapping[state.object->GetObjectId()][node] = { 1, (*CSyncManager::g_queryFunctions)->GetTimestamp()};
+				}
 
 				uint32_t endPos = buffer->GetPosition();
 
@@ -2359,12 +2243,42 @@ bool netSyncTree::WriteTreeCfx(int flags, int objFlags, netObject* object, datBi
 					auto length = endPos - startPos - sizeLength;
 
 					if (node->flags2 & state.flags)
+					{
 						length -= 1;
-					
+					}
+
+#if 0
+					if (length >= (1 << 13))
+					{
+						auto extraDumpPath = MakeRelativeCitPath(L"data\\cache\\extra_dump_info.bin");
+
+						auto f = _wfopen(extraDumpPath.c_str(), L"wb");
+
+						if (f)
+						{
+							fwrite(buffer->m_data, 1, buffer->m_maxBit / 8, f);
+							fclose(f);
+						}
+
+						trace("Node type: %s\n", typeid(*node).name());
+						trace("Start offset: %d\n", startPos);
+
+						FatalError("Tried to write a bad node length of %d bits in a '%s'. There should only ever be 8192 bits. Please report this on https://forum.fivem.net/t/318260 together with the .zip file from 'save information' below.", length, typeid(*node).name());
+					}
+#endif
+
+					if (state.pass == 2)
+					{
+#ifndef ONESYNC_CLONING_NATIVES
+						buffer->WriteUns(length, sizeLength);
+#endif
+					}
 				}
 
 				if (state.pass == 2)
+				{
 					buffer->Seek(endPos);
+				}
 			}
 		}
 

@@ -116,7 +116,7 @@ DWORD WINAPI GetThreadStartAddress(HANDLE hThread)
 
 }
 void SuspendSocialClubThreads() {
-
+	return;
 	HANDLE hSnapT;
 	HANDLE hT;
 	THREADENTRY32 te32;

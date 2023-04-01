@@ -6,7 +6,7 @@ namespace rl
 	class MessageBuffer
 	{
 	private:
-		static bool GetLengthHackState();
+		static bool GetLengthHackState() { return false; }
 
 	public:
 		inline MessageBuffer()
