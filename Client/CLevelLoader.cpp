@@ -116,7 +116,7 @@ DWORD WINAPI GetThreadStartAddress(HANDLE hThread)
 
 }
 void SuspendSocialClubThreads() {
-	return;
+	
 	HANDLE hSnapT;
 	HANDLE hT;
 	THREADENTRY32 te32;
@@ -169,7 +169,7 @@ void CLevelLoader::OnFrame() {
 	if (CBaseFactory<CLevelLoader>::Get().state == GAME_STATE::IN_LOADING && *CBaseFactory<CLevelLoader>::Get().g_initState == 0)
 	{
 		CBaseFactory<CLevelLoader>::Get().state = GAME_STATE::IN_GAME;
-		SuspendSocialClubThreads();
+		//SuspendSocialClubThreads();
 		//ShowWindow(CBootstrap::instance->gameWindow, SW_SHOWDEFAULT);
 	}
 

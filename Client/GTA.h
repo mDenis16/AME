@@ -251,47 +251,47 @@ public:
 	uint8_t syncFrequencies[8];
 	void* nodeBuffer;
 };
+#pragma pack(push, 1)
 class datBitBuffer
 {
 public:
-	inline datBitBuffer(void* data, size_t size)
+	inline datBitBuffer(void* data, uint32_t size)
 	{
 		m_data = data;
 		m_f8 = 0;
 		m_maxBit = size * 8;
-		m_unkBit = 0;
+		m_bitsRead = 0;
 		m_curBit = 0;
 		m_unk2Bit = 0;
-		m_f1C = 0;
+		m_flagBits = 0;
 	}
 
 	inline uint32_t GetPosition()
 	{
-		return m_unkBit;
+		return m_bitsRead;
 	}
 
-	inline bool Seek(int bits)
+	inline bool Seek(uint32_t bits)
 	{
 		if (bits >= 0)
 		{
-			uint32_t length = (m_f1C & 1) ? m_maxBit : m_curBit;
+			uint32_t length = (m_flagBits & 1) ? m_maxBit : m_curBit;
 
 			if (bits <= length)
 			{
-				m_unkBit = bits;
+				m_bitsRead = bits;
 			}
 		}
 
 		return false;
 	}
 
-	inline size_t GetDataLength()
+	inline int GetDataLength()
 	{
-		char leftoverBit = (m_curBit % 8) ? 1 : 0;
+		int leftoverBit = (m_curBit % 8) ? 1 : 0;
 
 		return (m_curBit / 8) + leftoverBit;
 	}
-
 	bool ReadInteger(uint32_t* integer, int bits);
 
 	// NOTE: SIGNED
@@ -303,16 +303,19 @@ public:
 
 	bool WriteBits(const void* src, size_t length, size_t srcOffset);
 
+
 public:
-	void* m_data; // +0
-	uint32_t m_f8; // +8
-	uint32_t m_maxBit; // +12
-	uint32_t m_unkBit; // +16
-	uint32_t m_curBit; // +20
-	uint32_t m_unk2Bit; // +24
-	char pad[12]; // +28
-	uint8_t m_f1C; // +40
+	void* m_data; //0x0000
+	uint32_t m_f8; //0x0008
+	uint32_t m_maxBit; //0x000C
+	uint32_t m_bitsRead; //0x0010
+	uint32_t m_curBit; //0x0014
+	uint32_t m_unk2Bit; //0x0018
+	uint8_t m_flagBits; //0x001C
+	char pad_0x01D[3];
+	uint32_t m_f20;
 };
+#pragma pack(pop)
 #define DECLARE_PEER_ACCESSOR(x) \
 	decltype(Impl2372{}.x)& x()        \
 	{                       \

@@ -36,12 +36,12 @@ void launch_no_sc() {
 			//auto result = CreateProcessW(L"D:\\SteamLibrary\\steamapps\\common\\Grand Theft Auto V\\GTA5.exe", ProcW, NULL, NULL, FALSE, CREATE_UNICODE_ENVIRONMENT/*CREATE_SUSPENDED*/, NULL, L"D:\\SteamLibrary\\steamapps\\common\\Grand Theft Auto V", (LPSTARTUPINFOW)(&StartupInfo), &ProcessInformation);
 		//	#	Time of Day	Thread	Module	API	Return Value	Error	Duration
 			//	1	3:00 : 18.089 PM	1	steamclient.dll	CreateProcessW("D:\SteamLibrary\steamapps\common\Grand Theft Auto V\PlayGTAV.exe", ""D:\SteamLibrary\steamapps\common\Grand Theft Auto V\PlayGTAV.exe"", NULL, NULL, FALSE, CREATE_SUSPENDED | CREATE_UNICODE_ENVIRONMENT, 0x0804c0a8, "D:\SteamLibrary\steamapps\common\Grand Theft Auto V", 0x0448f5e0, 0x0448f67c)	TRUE		0.0027508
-		auto cmdline = R"("D:\SteamLibraryV2\steamapps\common\Grand Theft Auto V\GTA5.exe" @commandline.txt -enableCrashpad -scCommerceProvider=4 -rglLanguage=en-US -scUseFQDNAvatars")";
+		auto cmdline = R"("D:\ceauderLibraryV2\ceva\common\Grand Theft Auto V\GTA5.exe" @commandline.txt -enableCrashpad -scCommerceProvider=4 -rglLanguage=en-US -scUseFQDNAvatars")";
 		
 		auto mata = std::string(cmdline);
 		std::wstring tactu(mata.begin(), mata.end());
 
-		auto result = CreateProcessW(L"D:\\SteamLibraryV2\\steamapps\\common\\Grand Theft Auto V\\GTA5.exe", tactu.data(), NULL, NULL, FALSE, CREATE_SUSPENDED, 0x0000000000000000, L"D:\\SteamLibraryV2\\steamapps\\common\\Grand Theft Auto V", (LPSTARTUPINFOW)(&StartupInfo), &ProcessInformation);
+		auto result = CreateProcessW(L"D:\\ceauderLibraryV2\\ceva\\common\\Grand Theft Auto V\\GTA5.exe", tactu.data(), NULL, NULL, FALSE, CREATE_SUSPENDED, 0x0000000000000000, L"D:\\ceauderLibraryV2\\ceva\\common\\Grand Theft Auto V", (LPSTARTUPINFOW)(&StartupInfo), &ProcessInformation);
 
 
 	if (result == 0)

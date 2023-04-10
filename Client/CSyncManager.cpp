@@ -233,26 +233,23 @@ void* __fastcall AllocateNetBlender(void* netObject, void* a2) {
 static bool(*g_orig_netBuffer_WriteUnsigned)(void* a1, uint32_t a2, int length, int a4);
 static bool _netBuffer_WriteUnsigned(void* a1, uint32_t a2, int length, int a4)
 {
-	length = 16;
+
 	return g_orig_netBuffer_WriteUnsigned(a1, a2, length, a4);
 }
 static void(*g_orig_netBuffer_ReadUnsigned)(void* a1, uint32_t* a2, int length, int a4);
 static void _netBuffer_ReadUnsigned(void* a1, uint32_t* a2, int length, int a4)
 {
-	length = 16;
-
 	return g_orig_netBuffer_ReadUnsigned(a1, a2, length, a4);
 }
 static void(*g_orig_netBuffer_BumpWriteCursor)(datBitBuffer* a1, int length);
 static void _netBuffer_BumpWriteCursor(datBitBuffer* a1, int length)
 {
-	length = 16;
+
 	return g_orig_netBuffer_BumpWriteCursor(a1, length);
 }
 static void(*g_orig_netBuffer_BumpReadWriteCursor)(datBitBuffer* a1, int length);
 static void _netBuffer_BumpReadWriteCursor(datBitBuffer* a1, int length)
 {
-	length = 16;
 	return g_orig_netBuffer_BumpReadWriteCursor(a1, length);
 }
 static char(*g_origReadDataNode)(void* node, uint32_t flags, void* mA0, datBitBuffer* buffer, netObject* object);
@@ -394,8 +391,8 @@ static bool WriteDataNodeStub(void* node, uint32_t flags, void* mA0, netObject* 
 	{
 		// save position and write a placeholder length frame
 		uint32_t position = buffer->GetPosition();
-		buffer->WriteBit(false);
-		buffer->WriteUns(0, 11);
+		//buffer->WriteBit(false);
+	//	buffer->WriteUns(0, 11);
 
 		bool rv = g_origWriteDataNode(node, flags, mA0, object, buffer, time, playerObj, playerId, unk, unk2545);
 
@@ -407,8 +404,8 @@ static bool WriteDataNodeStub(void* node, uint32_t flags, void* mA0, netObject* 
 		{
 			buffer->Seek(position);
 
-			buffer->WriteBit(true);
-			buffer->WriteUns(length, 11);
+			//buffer->WriteBit(true);
+		//	buffer->WriteUns(length, 11);
 			buffer->Seek(endPosition);
 
 			if (g_curNetObject)
@@ -447,20 +444,9 @@ static void SetupLocalPlayer(CNetGamePlayer* player)
 	auto clientId = 15;
 	auto idx = 13;
 
+	spdlog::info("joining player is {}", (void*)player);
+	spdlog::info("player->physicalPlayerIndex() is {}", player->physicalPlayerIndex());
 
-	player->physicalPlayerIndex() = idx;
-
-	g_players[idx] = player;
-
-	g_playersByNetId[clientId] = player;
-	g_netIdsByPlayer[player] = clientId;
-
-	// add to sequential list
-	g_playerList[g_playerListCount] = player;
-	g_playerListCount++;
-
-
-	// don't add to g_playerListRemote(!)
 }
 
 static void(*g_origJoinBubble)(void* bubbleMgr, CNetGamePlayer* player);
@@ -470,7 +456,7 @@ static void JoinPhysicalPlayerOnHost(void* bubbleMgr, CNetGamePlayer* player)
 	g_origJoinBubble(bubbleMgr, player);
 
 	
-	//SetupLocalPlayer(player);
+	SetupLocalPlayer(player);
 	spdlog::info("JoinPhysicalPlayerOnHost ");
 	
 }
@@ -646,9 +632,18 @@ static uint8_t netObject__GetPlayerOwnerId(netObject* object)
 
 	return owner ? owner->physicalPlayerIndex() : 0xFF;
 }
+static bool ReturnTrueAndKillThatTask(char* playerObj)
+{
+	char* ped = *(char**)(playerObj + 80);
+	char* task = *(char**)(ped + 32); // why is this in fwEntity anyway?
 
+	task[308] = 0;
+
+	return true;
+}
 void CSyncManager::Hook()
 {
+	
 	g_pedFactory = hook::get_address<decltype(g_pedFactory)>(hook::get_pattern("E8 ? ? ? ? 48 8B 05 ? ? ? ? 48 8B 58 08 48 8B CB E8", 8));
 	rage__s_NetworkTimeThisFrameStart = hook::get_address<uint32_t*>(hook::get_pattern("49 8B 0F 40 8A D6 41 2B C4 44 3B 25", 12));
 	rage__s_NetworkTimeLastFrameStart = hook::get_address<uint32_t*>(hook::get_pattern("89 05 ? ? ? ? 48 8B 01 FF 50 10 80 3D", 2));
@@ -677,6 +672,50 @@ void CSyncManager::Hook()
 
 	MH_CreateHook(hook::get_pattern("33 DB 48 8B F9 48 39 99 ? ? 00 00 74 ? 48 81 C1 E0", -10), AllocateNetPlayer, (void**)&g_origAllocateNetPlayer);
 
+	{
+		MH_CreateHook(hook::get_pattern("49 C1 FA 03 41 83 E1 07 4C 03 D1 B9 20 00 00 00", -0xE), _netBuffer_WriteUnsigned, (void**)&g_orig_netBuffer_WriteUnsigned);
+
+    	MH_CreateHook(hook::get_pattern("41 8D 40 FF 41 C1 FA 03 45", -0x1C), _netBuffer_ReadUnsigned, (void**)&g_orig_netBuffer_ReadUnsigned);
+
+	   MH_CreateHook(hook::get_pattern("01 51 10 8B 41 10 3B 41 14 7E 03"), _netBuffer_BumpReadWriteCursor, (void**)&g_orig_netBuffer_BumpReadWriteCursor);
+
+	  MH_CreateHook(hook::get_pattern("01 51 10 8B 41 10 3B 41 18 7E 03"), _netBuffer_BumpWriteCursor, (void**)&g_orig_netBuffer_BumpWriteCursor);
+	}
+
+	hook::put<uint8_t>(hook::get_pattern("75 29 48 8B 02 48 8B CA FF 50"), 0xEB);
+
+
+	{
+		{
+			auto floc = hook::get_pattern<char>("84 C0 0F 84 39 01 00 00 48 39 77", -0x2B);
+			hook::set_call(&g_origCallSkip, floc + 0xD9);
+			hook::call(floc + 0xD9, SkipCopyIf1s);
+		}
+	}
+
+	hook::jump(hook::pattern("48 85 C0 74 13 ? ? ? ? 74 0D 48 85 DB 74 19").count(1).get(0).get<void>(-0x37), ReturnTrueAndKillThatTask);
+
+	{auto location = hook::get_pattern("FF 90 ? ? ? ? 84 C0 0F 84 80 00 00 00 49", 0);
+	hook::nop(location, 6);
+	hook::call(location, mD0Stub);
+	}
+	hook::nop(hook::get_pattern("0F A3 C7 73 18 44", 3), 2);
+
+	// same for CNetObjPed
+	{
+		auto location = hook::get_pattern<char>("48 81 EC A0 01 00 00 33 FF 48 8B D9", -0x15);
+
+		auto stackSize = (0x20 + (256 * 8) + (256 * 4));
+		auto ptrsBase = 0x20;
+		auto intsBase = ptrsBase + (256 * 8);
+
+		hook::put<uint32_t>(location + 0x18, stackSize);
+
+
+		hook::put<uint32_t>(location + 0x13F, stackSize);
+		hook::put<uint32_t>(location + 0xD8, intsBase);
+
+	}
 
 	EnsureCreateCloneFuncs();
 }
@@ -828,6 +867,46 @@ char __fastcall Is_PedRunning_Internal(__int64 pedBlender)
 	return v2;
 }
 // Created with ReClass.NET 1.2 by KN4CK3R
+struct AckState
+{
+	netObject* object;
+	uint32_t time;
+};
+
+void netSyncTree::AckCfx(netObject* object, uint32_t timestamp)
+{
+	auto syncData = g_syncData[object->GetObjectId()].get();
+
+	if (!syncData)
+	{
+		return;
+	}
+
+	InitTree(this);
+
+	AckState state;
+	state.object = object;
+	state.time = timestamp;
+
+	TraverseTree<AckState>(this, state, [this, syncData](AckState& state, netSyncNodeBase* node, const std::function<bool()>& cb)
+		{
+			if (node->IsParentNode())
+			{
+				cb();
+			}
+			else
+			{
+				size_t nodeIdx = GET_NIDX(this, node);
+
+				if (state.time > syncData->nodes[nodeIdx].lastAck)
+				{
+					syncData->nodes[nodeIdx].lastAck = state.time;
+				}
+			}
+
+	return true;
+		});
+}
 
 class CBlender
 {
@@ -1115,7 +1194,7 @@ void CSyncManager::HandleCloneCreate(datBitBuffer& receivedBuff) {
 	//auto syncTree = netSyncTree::GetForType(NetObjEntityType::Player);
 	
 	datBitBuffer buf(receivedBuff.m_data, receivedBuff.GetDataLength());
-	buf.m_f1C = 1;
+	
 
 
 	// owner ID (forced to be remote so we can call ChangeOwner later)
@@ -1189,36 +1268,216 @@ void CSyncManager::HandleCloneCreate(datBitBuffer& receivedBuff) {
 
 static bool WrittenToBuffer = false;
 
+class CSyncDataNodeFrequent : public CProjectBaseSyncDataNode {};
+
+#pragma pack(push,4)
+class CPedMovementDataNode : CSyncDataNodeFrequent
+{
+public:
+	bool m_has_desired_move_blend_ratio_x; //0x00C0
+	bool m_has_desired_move_blend_ratio_y; //0x00C1
+	bool unk_00C2; //0x00C2
+	float m_desired_move_blend_ratio_x; //0x00C4
+	float m_desired_move_blend_ratio_y; //0x00C8
+	float unk_00CC; //0x00CC
+	float m_desired_pitch; //0x00D0
+}; //Size: 0x00D4
+static_assert(sizeof(CPedMovementDataNode) == 0xD4);
+static void DumpSyncNode(netSyncNodeBase* node, std::string indent = "\t", bool last = true)
+{
+
+	if (node->IsParentNode())
+	{
+		//printf("%sParentNode<\n", indent);
+		//printf("%s\tNodeIds<%d, %d, %d>,\n", indent, node->flags1, node->flags2, node->flags3);
+
+
+		for (auto child = node->firstChild; child; child = child->nextSibling)
+		{
+			DumpSyncNode(child, indent + "\t", (child->nextSibling == nullptr));
+		}
+
+
+		//
+				//printf("%s>%s\n", indent, !last ? "," : "");
+	}
+	else
+	{
+		int nodeSize = 1024;
+
+#ifdef GTA_FIVE
+		nodeSize = (node->GetMaximumDataSizeInternal() / 8) + 1;
+#endif
+
+		if (node->flags1 == 87 && node->flags2 == 87 && node->flags3 == 0 && nodeSize == 5) {
+			spdlog::info("found CPedMovementDataNode {}", (void*)node);
+			auto movement_node = (CPedMovementDataNode*)(node);
+			spdlog::info("m_desired_move_blend_ratio x: {} y: {} pitch: {}", movement_node->m_desired_move_blend_ratio_x, movement_node->m_desired_move_blend_ratio_y, movement_node->m_desired_pitch);
+		}
+		//printf("%sNodeWrapper<NodeIds<%d, %d, %d>, %p, %d>%s\n", indent, node->flags1, node->flags2, node->flags3, node, nodeSize, !last ? "," : "");
+	}
+}
+void __fastcall sub_7FF75D173954(__int64 a1, __int64 a2)
+{
+	unsigned int v2; // ebx
+	__int64 v5; // r14
+	__int64 v6; // rsi
+	__int64 v7; // rax
+	unsigned int v8; // ecx
+	__int64* v9; // rdx
+	__int64 v10; // rax
+
+	v2 = 0;
+	*(_QWORD*)(a1 + 8) = a2;
+	if (a2 && (*(unsigned __int8(__fastcall**)(__int64))(*(_QWORD*)a2 + 64i64))(a2))
+	{
+		v5 = (*(__int64(__fastcall**)(__int64))(*(_QWORD*)a2 + 80i64))(a2);
+		if (*(_DWORD*)(a1 + 36))
+		{
+			v6 = a1 + 392;
+			do
+			{
+				v7 = (*(__int64(__fastcall**)(__int64, _QWORD))(*(_QWORD*)v5 + 48i64))(v5, v2++);
+				*(_QWORD*)(*(_QWORD*)v6 + 72i64) = v7;
+				v6 += 8i64;
+			} while (v2 < *(_DWORD*)(a1 + 36));
+		}
+	}
+	else
+	{
+		v8 = 0;
+		if (*(_DWORD*)(a1 + 36))
+		{
+			v9 = (__int64*)(a1 + 392);
+			do
+			{
+				v10 = *v9;
+				++v8;
+				++v9;
+				*(_QWORD*)(v10 + 72) = 0i64;
+			} while (v8 < *(_DWORD*)(a1 + 36));
+		}
+	}
+}
+char __fastcall CanApplyToObjectIDA(__int64 a1, __int64 a2)
+{
+	char v4; // bl
+	int v5; // edi
+	_QWORD* i; // rsi
+
+	v4 = 1;
+	sub_7FF75D173954(a1, a2);
+	if (!(*(unsigned __int8(__fastcall**)(__int64))(*(_QWORD*)a2 + 160i64))(a2))
+		return 0;
+	v5 = 0;
+	if (*(_DWORD*)(a1 + 32))
+	{
+		for (i = (_QWORD*)(a1 + 48);
+			!*(_BYTE*)(*i + 64i64)
+			|| (*(unsigned __int8(__fastcall**)(_QWORD, __int64))(*(_QWORD*)*i + 168i64))(*i, a2);
+			++i)
+		{
+			if ((unsigned int)++v5 >= *(_DWORD*)(a1 + 32))
+				return v4;
+		}
+		return 0;
+	}
+	return v4;
+}
 netObject* CSyncManager::CreateCloneToLocalPlayer() {
 	
-	static char bluh[1000];
+	static char bluh[9000];
 	static size_t writtenSize = 0;
 	if (EnsurePlayer31()) {
 		auto ts = *rage__s_NetworkTimeLastFrameStart;
 		auto local = GetLocalPlayer();
 		auto local_ped = getPlayerPedForNetPlayer(g_playerMgr->localPlayer);
 		auto local_net = GetLocalPlayerPedNetObject();
-		static bool Written = false;
+	/*	static bool Written = false;
 		if (Written) {
 			auto st = netSyncTree::GetForType(NetObjEntityType::Player);
 			datBitBuffer buffer(bluh, writtenSize);
 			if (st->ReadFromBuffer(1, 0, &buffer, nullptr)) {
 				CPlayerCreationDataNode* node = (CPlayerCreationDataNode*)st->GetCreationDataNode();
 				spdlog::info("remote net model_hash {}", node->m_model);
-			}
+			}*/
 
-		}
-		else {
-		
+		//}
+		static bool Written = false;
+		if (!Written) {
 			memset(bluh, 0, sizeof(bluh));
 
 			datBitBuffer buffer(bluh, sizeof(bluh));
+			
 			auto st = local_net->GetSyncTree();
-			st->WriteTreeCfx(1, 0, local_net, &buffer, 0, nullptr, 31, nullptr, nullptr);
-			CPlayerCreationDataNode* node = (CPlayerCreationDataNode*)st->GetCreationDataNode();
-			spdlog::info("local net model_hash {}", node->m_model);
-			writtenSize = buffer.GetDataLength();
-			Written = true;
+			st->WriteTreeCfx(1, 0, local_net, &buffer, (*g_queryFunctions)->GetTimestamp(), nullptr, 31, nullptr, nullptr);
+			CPlayerCreationDataNode* node = (CPlayerCreationDataNode*)(st->GetCreationDataNode());
+			
+			spdlog::info("before read model hash {}", node->m_model);
+		
+			auto some_tree = netSyncTree::GetForType(NetObjEntityType::Player);
+			datBitBuffer buffer2(buffer.m_data, buffer.GetDataLength());
+			buffer2.m_flagBits = 1;
+			some_tree->ReadFromBuffer(1, 0, &buffer2, nullptr);
+			spdlog::info("after read model hash {}", node->m_model);
+
+			auto obj = CreateCloneObject(NetObjEntityType::Player, rand(), 31, 0, 32);
+
+			auto netObjectINT64 = (__int64)(obj);
+
+			auto syncTree = (*(__int64(__fastcall**)(__int64))(*(_QWORD*)netObjectINT64 + 96i64))(netObjectINT64);
+			if (!(unsigned __int8)CanApplyToObjectIDA(syncTree, netObjectINT64))
+			{
+				spdlog::info("Can't apply node data");
+				return nullptr;
+			}
+			spdlog::info("merge apply to object");
+
+			auto mata_st = (netSyncTree*)(obj->GetSyncTree());
+			if (!mata_st->CanApplyToObject((netObject*)netObjectINT64))
+			{
+				spdlog::info("Couldn't apply object.\n");
+				return nullptr;
+			}
+			spdlog::info("merge apply to object 2");
+			(*(void(__fastcall**)(__int64))(*(_QWORD*)netObjectINT64 + 528i64))(netObjectINT64);
+			auto v60 = (*(__int64(__fastcall**)(__int64))(*(_QWORD*)netObjectINT64 + 96i64))(netObjectINT64);
+			(*(void(__fastcall**)(__int64, __int64, _QWORD))(*(_QWORD*)v60 + 16i64))(v60, netObjectINT64, 0i64);
+			//(*(void(__fastcall**)(__int64, __int64))(*(_QWORD*)v23 + 96i64))(v23, netObject);
+
+			(*(void(__fastcall**)(__int64))(*(_QWORD*)netObjectINT64 + 536i64))(netObjectINT64);
+
+			(*(void(__fastcall**)(__int64))(*(_QWORD*)netObjectINT64 + 520i64))(netObjectINT64);
+
+			mata_st->ApplyToObject(obj, nullptr);
+
+			obj->syncData.isRemote = true;
+			obj->syncData.ownerId = 31;
+
+			(*g_objectMgr)->RegisterNetworkObject(obj);
+
+			if (!obj->GetBlender())
+			{
+				spdlog::info("Created net blender\n");
+				obj->CreateNetBlender();
+			}
+
+			if (obj->GetBlender())
+			{
+				obj->GetBlender()->SetTimestamp(((*g_queryFunctions)->GetTimestamp()));
+
+				obj->PostSync();
+
+				obj->GetBlender()->ApplyBlend();
+				obj->GetBlender()->m_38();
+			}
+			else {
+				spdlog::info("nu are blender");
+			}
+
+			obj->PostCreate();
+
+			spdlog::info("game object {} ", obj->GetGameObject());
 		}
 		
 	}
@@ -1257,65 +1516,6 @@ static void TraverseSyncNode(netSyncNodeBase* node, netObject* object = nullptr)
 }
 
 
-class CSyncDataNodeFrequent : public CProjectBaseSyncDataNode {};
-
-#pragma pack(push,4)
-class CPedMovementDataNode : CSyncDataNodeFrequent
-{
-public:
-	bool m_has_desired_move_blend_ratio_x; //0x00C0
-	bool m_has_desired_move_blend_ratio_y; //0x00C1
-	bool unk_00C2; //0x00C2
-	float m_desired_move_blend_ratio_x; //0x00C4
-	float m_desired_move_blend_ratio_y; //0x00C8
-	float unk_00CC; //0x00CC
-	float m_desired_pitch; //0x00D0
-}; //Size: 0x00D4
-static_assert(sizeof(CPedMovementDataNode) == 0xD4);
-static void DumpSyncNode(netSyncNodeBase* node, std::string indent = "\t", bool last = true)
-{
-	
-	if (node->IsParentNode())
-	{
-		//printf("%sParentNode<\n", indent);
-		//printf("%s\tNodeIds<%d, %d, %d>,\n", indent, node->flags1, node->flags2, node->flags3);
-	
-		
-		for (auto child = node->firstChild; child; child = child->nextSibling)
-		{
-			DumpSyncNode(child, indent + "\t", (child->nextSibling == nullptr));
-		}
-		
-
-//
-		//printf("%s>%s\n", indent, !last ? "," : "");
-	}
-	else
-	{
-		int nodeSize = 1024;
-
-#ifdef GTA_FIVE
-		nodeSize = (node->GetMaximumDataSizeInternal() / 8) + 1;
-#endif
-		
-		if (node->flags1 == 87 && node->flags2 == 87 && node->flags3 == 0 && nodeSize == 5) {
-			spdlog::info("found CPedMovementDataNode {}", (void*)node);
-			auto movement_node = (CPedMovementDataNode*)(node);
-			spdlog::info("m_desired_move_blend_ratio x: {} y: {} pitch: {}", movement_node->m_desired_move_blend_ratio_x, movement_node->m_desired_move_blend_ratio_y, movement_node->m_desired_pitch);
-		}
-		//printf("%sNodeWrapper<NodeIds<%d, %d, %d>, %p, %d>%s\n", indent, node->flags1, node->flags2, node->flags3, node, nodeSize, !last ? "," : "");
-	}
-}
-static void DumpSyncTree(netSyncTree* syncTree)
-{
-	std::string objectName = GetClassTypeName(syncTree);
-
-	printf("using %p = SyncTree<\n", syncTree);
-
-	DumpSyncNode(syncTree->syncNode);
-
-	printf(">;\n");
-}
 void CSyncManager::RunCloneTest() {
 
 	//static auto show_debug_info_target = hook::pattern("48 8B C4 48 89 58 08 55 56 57 41 54 41 55 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 0F 29 70 B8 0F 29 78 A8 44 0F 29 40 ? 48 8D 0D").count(1).get(0).get<void>();
@@ -1969,6 +2169,53 @@ static void AddNodeAndExternalDependentNodes(netSyncDataNodeBase* node, netSyncD
 		}
 	}
 }
+bool datBitBuffer::ReadInteger(uint32_t* integer, int bits)
+{
+	static auto fn = hook::get_pattern<bool(void*, uint32_t*, int)>("8B 44 24 30 8B D6 48 8B CB 89 07 E8", -0x50);
+	return fn(this, integer, bits);
+}
+bool datBitBuffer::WriteInteger(uint32_t integer, int bits)
+{
+	static auto fn = hook::get_pattern<bool(void*, uint32_t, int)>("48 8B D9 40 84 79 1C 75 6F 8B 49 10", -0x29);
+	return fn(this, integer, bits);
+}
+bool datBitBuffer::WriteUns(uint32_t integer, int bits)
+{
+
+	// this method only exists inlined in GTA V so we have to manually implement it
+	if (m_flagBits & 1)
+	{
+		return false;
+	}
+
+	if (m_bitsRead + bits > m_maxBit)
+	{
+		return false;
+	}
+
+	if (!(m_flagBits & 2))
+	{
+		_netBuffer_WriteUnsigned(m_data, integer, bits, m_f8 + m_bitsRead);
+	}
+
+	_netBuffer_BumpReadWriteCursor(this, bits);
+
+	return true;
+}
+
+
+bool datBitBuffer::WriteBit(bool bit)
+{
+	static auto fn = hook::get_pattern<bool(void*, bool)>("F6 43 1C 01 75 5E", -0xF);
+	return fn(this, bit);
+}
+
+bool datBitBuffer::WriteBits(const void* src, size_t length, size_t srcOffset)
+{
+	static auto fn = hook::get_pattern<bool(void*, const void* src, size_t length, size_t srcOffset)>("48 8B D9 75 44 8B 49 10", -0x14);
+	return fn(this, src, length, srcOffset);
+}
+
 bool netSyncTree::WriteTreeCfx(int flags, int objFlags, netObject* object, datBitBuffer* buffer, uint32_t time, void* logger, uint8_t targetPlayer, void* outNull, uint32_t* lastChangeTime)
 {
 	auto syncData = g_syncData[object->GetObjectId()].get();
@@ -2012,12 +2259,12 @@ bool netSyncTree::WriteTreeCfx(int flags, int objFlags, netObject* object, datBi
 
 	//if (icgi->OneSyncBigIdEnabled)
 	{
-		sizeLength = 16;
+	//	sizeLength = 16;
 	}
-	///else if (icgi->NetProtoVersion < 0x201812271741)
-	//{
+	//else if (icgi->NetProtoVersion < 0x201812271741)
+	{
 	//	sizeLength = 11;
-	//}
+	}
 
 	eastl::bitset<200> processedNodes;
 
@@ -2081,7 +2328,7 @@ bool netSyncTree::WriteTreeCfx(int flags, int objFlags, netObject* object, datBi
 						memset(tempData.data(), 0, tempData.size());
 
 #ifdef GTA_FIVE
-					//	LoadPlayerAppearanceDataNode(dataNode);
+						//LoadPlayerAppearanceDataNode(dataNode);
 #endif
 
 						datBitBuffer tempBuf(tempData.data(), (sizeLength == 11) ? 256 : tempData.size());
@@ -2215,8 +2462,8 @@ bool netSyncTree::WriteTreeCfx(int flags, int objFlags, netObject* object, datBi
 					{
 						buffer->Seek(startPos);
 					}
+					}
 				}
-			}
 			else
 			{
 				state.wroteAny = true;
@@ -2234,7 +2481,7 @@ bool netSyncTree::WriteTreeCfx(int flags, int objFlags, netObject* object, datBi
 
 					if (node->flags2 & state.flags)
 					{
-						buffer->WriteBit(true);
+					buffer->WriteBit(true);
 					}
 				}
 
@@ -2280,10 +2527,10 @@ bool netSyncTree::WriteTreeCfx(int flags, int objFlags, netObject* object, datBi
 					buffer->Seek(endPos);
 				}
 			}
-		}
+			}
 
 		return didWrite;
-	};
+		};
 
 	// traverse state and dirty nodes first
 	state.pass = 1;
@@ -2296,53 +2543,53 @@ bool netSyncTree::WriteTreeCfx(int flags, int objFlags, netObject* object, datBi
 
 	return state.wroteAny;
 }
-bool datBitBuffer::ReadInteger(uint32_t* integer, int bits)
-{
-	static auto fn = hook::get_pattern<bool(void*, uint32_t*, int)>("8B 44 24 30 8B D6 48 8B CB 89 07 E8", -0x50);
-	return fn(this, integer, bits);
-}
-bool datBitBuffer::WriteInteger(uint32_t integer, int bits)
-{
-	static auto fn = hook::get_pattern<bool(void*, uint32_t, int)>("48 8B D9 40 84 79 1C 75 6F 8B 49 10", -0x29);
-	return fn(this, integer, bits);
-}
-bool datBitBuffer::WriteUns(uint32_t integer, int bits)
-{
-	
-	// this method only exists inlined in GTA V so we have to manually implement it
-	if (m_f1C & 1)
-	{
-		return false;
-	}
-
-	if (m_unkBit + bits > m_maxBit)
-	{
-		return false;
-	}
-
-	if (!(m_f1C & 2))
-	{
-		_netBuffer_WriteUnsigned(m_data, integer, bits, m_f8 + m_unkBit);
-	}
-
-	_netBuffer_BumpReadWriteCursor(this, bits);
-
-	return true;
-}
-
-
-bool datBitBuffer::WriteBit(bool bit)
-{
-	static auto fn = hook::get_pattern<bool(void*, bool)>("F6 43 1C 01 75 5E", -0xF);
-	return fn(this, bit);
-}
-
-bool datBitBuffer::WriteBits(const void* src, size_t length, size_t srcOffset)
-{
-	static auto fn = hook::get_pattern<bool(void*, const void* src, size_t length, size_t srcOffset)>("48 8B D9 75 44 8B 49 10", -0x14);
-	return fn(this, src, length, srcOffset);
-}
-
+//bool datBitBuffer::ReadInteger(uint32_t* integer, int bits)
+//{
+//	static auto fn = hook::get_pattern<bool(void*, uint32_t*, int)>("8B 44 24 30 8B D6 48 8B CB 89 07 E8", -0x50);
+//	return fn(this, integer, bits);
+//}
+//bool datBitBuffer::WriteInteger(uint32_t integer, int bits)
+//{
+//	static auto fn = hook::get_pattern<bool(void*, uint32_t, int)>("48 8B D9 40 84 79 1C 75 6F 8B 49 10", -0x29);
+//	return fn(this, integer, bits);
+//}
+//bool datBitBuffer::WriteUns(uint32_t integer, int bits)
+//{
+//	
+//	// this method only exists inlined in GTA V so we have to manually implement it
+//	if (m_f1C & 1)
+//	{
+//		return false;
+//	}
+//
+//	if (m_unkBit + bits > m_maxBit)
+//	{
+//		return false;
+//	}
+//
+//	if (!(m_f1C & 2))
+//	{
+//		_netBuffer_WriteUnsigned(m_data, integer, bits, m_f8 + m_unkBit);
+//	}
+//
+//	_netBuffer_BumpReadWriteCursor(this, bits);
+//
+//	return true;
+//}
+//
+//
+//bool datBitBuffer::WriteBit(bool bit)
+//{
+//	static auto fn = hook::get_pattern<bool(void*, bool)>("F6 43 1C 01 75 5E", -0xF);
+//	return fn(this, bit);
+//}
+//
+//bool datBitBuffer::WriteBits(const void* src, size_t length, size_t srcOffset)
+//{
+//	static auto fn = hook::get_pattern<bool(void*, const void* src, size_t length, size_t srcOffset)>("48 8B D9 75 44 8B 49 10", -0x14);
+//	return fn(this, src, length, srcOffset);
+//}
+//
 
 void FindTaskPrimaryByType_IDA(__int64 a1, int a2, int a3)
 {

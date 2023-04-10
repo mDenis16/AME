@@ -307,12 +307,77 @@ CreateFileW_HK(
     }
     return handle;
 }
+#include <Windows.h>
+void PatchAllInt()
+{
+    
+        static auto pattern_to_byte = [](const char* pattern)
+        {
+            auto bytes = std::vector<char>{};
+            auto start = const_cast<char*>(pattern);
+            auto end = const_cast<char*>(pattern) + strlen(pattern);
+
+            for (auto current = start; current < end; ++current)
+            {
+                if (*current == '?')
+                {
+                    ++current;
+                    if (*current == '?')
+                        ++current;
+                    bytes.push_back('\?');
+                }
+                else
+                {
+                    bytes.push_back(strtoul(current, &current, 16));
+                }
+            }
+            return bytes;
+        };
+
+        const auto module_handle = GetModuleHandleA(nullptr);
+
+        auto dos_header = reinterpret_cast<PIMAGE_DOS_HEADER>(module_handle);
+        auto nt_headers =
+            reinterpret_cast<PIMAGE_NT_HEADERS>(reinterpret_cast<std::uint8_t*>(module_handle) + dos_header->e_lfanew);
+        DWORD64 base = (DWORD64)module_handle;
+        auto size_of_image = nt_headers->OptionalHeader.SizeOfImage;
+        auto patternBytes = pattern_to_byte("CC");
+
+        DWORD64 patternLength = patternBytes.size();
+        auto data = patternBytes.data();
+
+        for (DWORD64 i = 0; i < size_of_image - patternLength; i++)
+        {
+            bool found = true;
+            for (DWORD64 j = 0; j < patternLength; j++)
+            {
+                char a = '\?';
+                char b = *(char*)(base + i + j);
+                found &= data[j] == a || data[j] == b;
+            }
+            if (found)
+            {
+                void* addr = (void*)(base + i);
+                printf("found int at address %p \n ", addr);
+
+              //  *((byte*)base + i) = 0x90;
+                //memset(addr, (BYTE)0xC3, 1);
+
+                //irtualProtect(pDbgUiRemoteBreakin, sizeof(DbgUiRemoteBreakinPatch), dwOldProtect, &dwOldProtect);
+                //*(std::uintptr_t*)(base + i) = 0x90;
+               // *(PBYTE)(base + i) = (BYTE)0xC3;
+              //  return base + i;
+            }
+        }
+     
+ 
+}
 void CBootstrap::Initialize()
 {
     
     
     //Patch_DbgBreakPoint();
-   // Patch_DbgUiRemoteBreakin();
+  //  Patch_DbgUiRemoteBreakin();
 
  /*   MessageBox(0, "Created thread inside GTA5", "MEARSA", MB_OK);*/
    
@@ -495,7 +560,7 @@ LoadLibraryW_HK(
       //  return NULL;
     return LoadLibraryW_Original(lpLibFileName);
 }
-
+void PatchAllInt();
 void CBootstrap::GetStartupInfoW_HK(LPSTARTUPINFOW lpStartupInfo) {
   
     
@@ -516,6 +581,7 @@ void CBootstrap::GetStartupInfoW_HK(LPSTARTUPINFOW lpStartupInfo) {
         SetConsoleTitleA("AME-Console");
     }
 
+    PatchAllInt();
 
     hook::set_base();
  
@@ -526,11 +592,7 @@ void CBootstrap::GetStartupInfoW_HK(LPSTARTUPINFOW lpStartupInfo) {
     MessageBox(0, "Time for debug.", "Hey!", MB_OK);
     spdlog::info("mata");
 
-    PPEB peb = (PPEB)__readgsqword(0x60);
-    peb->BeingDebugged = false;
-
-    // set GlobalFlags
-    *(DWORD*)((char*)peb + 0xBC) &= ~0x70;
+    
 
     hook::set_base();
     hook::call(hook::pattern("84 C0 75 0C B2 01 B9 2F A9 C2 F4").count(1).get(0).get<void>(-5), ThisIsActuallyLaunchery);

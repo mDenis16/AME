@@ -236,7 +236,7 @@ static void StartupScriptWrap()
 		}
 	}
 
-	origStartupScript();
+	//origStartupScript();
 }
 
 void CScrEngine::CreateThread(ScriptThread* thread) {
@@ -319,14 +319,15 @@ static int JustNoScript(ScriptThread* thread, int a2)
 	return thread->GetContext()->m_State;
 }
 void CScrEngine::AddToList(ScriptThread* thread) {
+	thread->SetNetworkFlag(true);
 	g_ownedThreads.insert(thread);
 }
 void CScrEngine::Hook() {
-
+	
 	//g_ownedThreads.insert(&mata);
 
 	MH_CreateHook(hook::pattern("8B 59 14 44 8B 79 18 8B FA 8B 51 0C").count(1).get(0).get<void>(-0x1D), ReturnIfMp, (void**)&g_origScrProgramReturn);
-	MH_CreateHook(hook::pattern("48 83 EC 20 80 B9 ? 01 00 00 00 8B FA").count(1).get(0).get<void>(-0xB), JustNoScript, (void**)&g_origNoScript);
+	//MH_CreateHook(hook::pattern("48 83 EC 20 80 B9 ? 01 00 00 00 8B FA").count(1).get(0).get<void>(-0xB), JustNoScript, (void**)&g_origNoScript);
 	
 	auto scrThreadCollectionPattern = hook::pattern("48 8B C8 EB 03 49 8B CD 48 8B 05");
 

@@ -26,7 +26,8 @@ public:
 	inline static CNetGamePlayer* (*g_origAllocateNetPlayer)(void*);
 	void RunCoopTest();
 	static CNetGamePlayer* AllocateNetPlayer(void* mgr);
-
+	static void OnReceiveCloneCreate(datBitBuffer& buffer);
+	static void OnReceiveCloneUpdate(datBitBuffer& buffer);
 	static netObject* GetNetworkObject(uint16_t id, bool a3);
 	static netObject* GetLocalPlayerPedNetObject();
 

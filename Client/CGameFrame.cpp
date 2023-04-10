@@ -12,6 +12,11 @@ static void (*g_orig_sysService_UpdateClass)(void*);
 #include "CBootstrap.h"
 #include "nativeList.h"
 #include <MinHook.h>
+#include <fstream>
+#include <winternl.h>
+#include "CBaseFactory.h"
+#include <spdlog/spdlog.h>
+#include <TlHelp32.h>
 static int* netNoUpnp = 0;
 static int* netNoPcp = 0;
 bool CGameFrame::OnLookAlive()
@@ -47,11 +52,16 @@ bool CGameFrame::OnLookAlive()
 		Called = true;
 	}
 	
+	PPEB peb = (PPEB)__readgsqword(0x60);
+	peb->BeingDebugged = false;
 
+	// set GlobalFlags
+	*(DWORD*)((char*)peb + 0xBC) &= ~0x70;
 	return g_origLookAlive();
 }
 void CGameFrame::Hook()
 {
+	
 	
 	spdlog::info("CGameFrame::Hook");
 	void* lookAliveFrameCall = hook::pattern("48 89 5C 24 ? 48 89 74 24 ? 55 57 41 54 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? E8 ? ? ? ? 33 F6 48 8D").count(1).get(0).get<void>();
